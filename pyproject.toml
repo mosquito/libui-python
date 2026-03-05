@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=75", "meson>=1.0", "ninja"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "libui"
+version = "0.1.0"
+description = "Python bindings for libui-ng"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["libui*"]
