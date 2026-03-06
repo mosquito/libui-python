@@ -77,6 +77,11 @@ AStr_insert_at(PyObject *self, PyObject *args)
     Py_ssize_t pos;
     if (!PyArg_ParseTuple(args, "sn", &text, &pos)) return NULL;
     UiAttributedStringObject *s = (UiAttributedStringObject *)self;
+    size_t len = uiAttributedStringLen(s->str);
+    if (pos < 0 || (size_t)pos > len) {
+        PyErr_SetString(PyExc_IndexError, "insert position out of range");
+        return NULL;
+    }
     uiAttributedStringInsertAtUnattributed(s->str, text, (size_t)pos);
     Py_RETURN_NONE;
 }
@@ -88,6 +93,11 @@ AStr_delete(PyObject *self, PyObject *args)
     Py_ssize_t start, end;
     if (!PyArg_ParseTuple(args, "nn", &start, &end)) return NULL;
     UiAttributedStringObject *s = (UiAttributedStringObject *)self;
+    size_t len = uiAttributedStringLen(s->str);
+    if (start < 0 || end < 0 || (size_t)start > len || (size_t)end > len || start > end) {
+        PyErr_SetString(PyExc_IndexError, "delete range out of bounds");
+        return NULL;
+    }
     uiAttributedStringDelete(s->str, (size_t)start, (size_t)end);
     Py_RETURN_NONE;
 }

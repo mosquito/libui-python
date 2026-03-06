@@ -32,6 +32,11 @@ ProgressBar_set_value(PyObject *self, PyObject *value, void *Py_UNUSED(closure))
     if (check_control(as_ctrl(self)) < 0) return -1;
     int v = (int)PyLong_AsLong(value);
     if (v == -1 && PyErr_Occurred()) return -1;
+    if (v < -1 || v > 100) {
+        PyErr_SetString(PyExc_ValueError,
+            "progress bar value must be -1 (indeterminate) or 0-100");
+        return -1;
+    }
     uiProgressBarSetValue(uiProgressBar(as_ctrl(self)->control), v);
     return 0;
 }

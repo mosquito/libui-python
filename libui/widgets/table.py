@@ -17,19 +17,22 @@ class _ColumnDescriptor:
 
 class TextColumn(_ColumnDescriptor):
     def __init__(
-        self, name: str, key: str, editable: bool = False, color_col: int = -1
+        self, name: str, key: str, editable: bool = False, color_col: int = -1,
+        width: int = -1,
     ):
         self.name = name
         self.key = key
         self.editable = editable
         self.color_col = color_col
+        self.width = width
 
 
 class CheckboxColumn(_ColumnDescriptor):
-    def __init__(self, name: str, key: str, editable: bool = True):
+    def __init__(self, name: str, key: str, editable: bool = True, width: int = -1):
         self.name = name
         self.key = key
         self.editable = editable
+        self.width = width
 
 
 class CheckboxTextColumn(_ColumnDescriptor):
@@ -41,6 +44,7 @@ class CheckboxTextColumn(_ColumnDescriptor):
         checkbox_editable: bool = True,
         text_editable: bool = False,
         text_color_col: int = -1,
+        width: int = -1,
     ):
         self.name = name
         self.checkbox_key = checkbox_key
@@ -48,12 +52,14 @@ class CheckboxTextColumn(_ColumnDescriptor):
         self.checkbox_editable = checkbox_editable
         self.text_editable = text_editable
         self.text_color_col = text_color_col
+        self.width = width
 
 
 class ProgressColumn(_ColumnDescriptor):
-    def __init__(self, name: str, key: str):
+    def __init__(self, name: str, key: str, width: int = -1):
         self.name = name
         self.key = key
+        self.width = width
 
 
 class ButtonColumn(_ColumnDescriptor):
@@ -63,17 +69,20 @@ class ButtonColumn(_ColumnDescriptor):
         text_key: str,
         on_click: Callable | None = None,
         clickable: bool = True,
+        width: int = -1,
     ):
         self.name = name
         self.text_key = text_key
         self.on_click = on_click
         self.clickable = clickable
+        self.width = width
 
 
 class ImageColumn(_ColumnDescriptor):
-    def __init__(self, name: str, key: str):
+    def __init__(self, name: str, key: str, width: int = -1):
         self.name = name
         self.key = key
+        self.width = width
 
 
 class ImageTextColumn(_ColumnDescriptor):
@@ -84,12 +93,14 @@ class ImageTextColumn(_ColumnDescriptor):
         text_key: str,
         editable: bool = False,
         color_col: int = -1,
+        width: int = -1,
     ):
         self.name = name
         self.image_key = image_key
         self.text_key = text_key
         self.editable = editable
         self.color_col = color_col
+        self.width = width
 
 
 class DataTable(Node):
@@ -255,6 +266,11 @@ class DataTable(Node):
                     edit,
                     desc.color_col,
                 )
+
+        # Apply column widths
+        for i, desc in enumerate(self._columns):
+            if hasattr(desc, "width") and desc.width > 0:
+                table.set_column_width(i, desc.width)
 
         self._model = model
 

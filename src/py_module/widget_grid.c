@@ -43,8 +43,13 @@ Grid_append(PyObject *self, PyObject *args, PyObject *kwds)
 
     UiControlObject *self_c = as_ctrl(self);
     UiControlObject *child_c = as_ctrl(child_obj);
-    if (check_control(self_c) < 0 || check_control(child_c) < 0)
+    if (check_control(self_c) < 0 || check_control(child_c) < 0
+        || check_no_parent(child_c) < 0)
         return NULL;
+    if (xspan < 0 || yspan < 0) {
+        PyErr_SetString(PyExc_ValueError, "xspan and yspan must be non-negative");
+        return NULL;
+    }
 
     uiGridAppend(uiGrid(self_c->control), child_c->control,
                  left, top, xspan, yspan,
@@ -79,7 +84,7 @@ Grid_insert_at(PyObject *self, PyObject *args, PyObject *kwds)
     UiControlObject *child_c = as_ctrl(child_obj);
     UiControlObject *exist_c = as_ctrl(existing_obj);
     if (check_control(self_c) < 0 || check_control(child_c) < 0
-        || check_control(exist_c) < 0)
+        || check_control(exist_c) < 0 || check_no_parent(child_c) < 0)
         return NULL;
 
     uiGridInsertAt(uiGrid(self_c->control), child_c->control,

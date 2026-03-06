@@ -38,7 +38,8 @@ Box_append(PyObject *self, PyObject *args, PyObject *kwds)
         return NULL;
     UiControlObject *self_c = as_ctrl(self);
     UiControlObject *child_c = as_ctrl(child_obj);
-    if (check_control(self_c) < 0 || check_control(child_c) < 0)
+    if (check_control(self_c) < 0 || check_control(child_c) < 0
+        || check_no_parent(child_c) < 0)
         return NULL;
 
     uiBoxAppend(uiBox(self_c->control), child_c->control, stretchy);

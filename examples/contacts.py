@@ -27,7 +27,6 @@ from libui.declarative import (
     DataTable,
     Entry,
     Form,
-    Group,
     HBox,
     Label,
     ListState,
@@ -37,6 +36,7 @@ from libui.declarative import (
     MultilineEntry,
     ProgressBar,
     QuitItem,
+    Separator,
     State,
     Tab,
     TextColumn,
@@ -245,24 +245,20 @@ def build_editor(
     # Subscribe to editing_index changes to load the contact
     editing_index.subscribe(lambda: load_contact(editing_index.value))
 
-    return Group(
-        "Contact Details",
-        VBox(
-            Form(
-                ("First name:", Entry(text=first)),
-                ("Last name:", Entry(text=last)),
-                ("Email:", Entry(text=email)),
-                ("Phone:", Entry(text=phone)),
-                ("Company:", Entry(text=company)),
-                ("Category:", Combobox(items=CATEGORIES, selected=category)),
-            ),
-            Label("Notes:"),
-            stretchy(MultilineEntry(text=notes, wrapping=True)),
-            HBox(
-                Button("Save", on_clicked=save_contact),
-                Button("New", on_clicked=clear_form),
-                Button("Delete", on_clicked=delete_contact),
-            ),
+    return VBox(
+        Form(
+            ("First name:", Entry(text=first)),
+            ("Last name:", Entry(text=last)),
+            ("Email:", Entry(text=email)),
+            ("Phone:", Entry(text=phone)),
+            ("Company:", Entry(text=company)),
+            ("Category:", Combobox(items=CATEGORIES, selected=category)),
+            ("Notes:", MultilineEntry(text=notes, wrapping=True), True),
+        ),
+        HBox(
+            Button("Save", on_clicked=save_contact),
+            Button("New", on_clicked=clear_form),
+            Button("Delete", on_clicked=delete_contact),
         ),
     )
 
@@ -274,7 +270,6 @@ def build_list_panel(
     contacts: ListState,
     status: State[str],
     editing_index: State[int],
-    progress: State[int],
 ):
     """Build the left-side contact list with search."""
 
@@ -297,11 +292,12 @@ def build_list_panel(
             checkbox_key="selected",
             text_key="first",
             checkbox_editable=True,
+            width=120,
         ),
-        TextColumn("Last Name", key="last"),
-        TextColumn("Email", key="email"),
-        TextColumn("Company", key="company"),
-        TextColumn("Category", key="category"),
+        TextColumn("Last Name", key="last", width=100),
+        TextColumn("Email", key="email", width=150),
+        TextColumn("Company", key="company", width=120),
+        TextColumn("Category", key="category", width=80),
         on_row_clicked=on_row_click,
         on_row_double_clicked=on_row_dblclick,
     )
@@ -316,28 +312,21 @@ def build_list_panel(
 
     contacts.subscribe(update_count)
 
-    return Group(
-        "Contacts",
-        VBox(
-            HBox(
-                Label("Search:"),
-                stretchy(
-                    Entry(
-                        text=search,
-                        type="search",
-                        on_changed=lambda text: status.set(
-                            f"Search: '{text}'" if text else "Ready."
-                        ),
-                    )
-                ),
-            ),
-            stretchy(table),
-            HBox(
-                stretchy(Label(status)),
-                count_label,
-                ProgressBar(value=progress),
+    return VBox(
+        HBox(
+            Label("Search:"),
+            stretchy(
+                Entry(
+                    text=search,
+                    type="search",
+                    on_changed=lambda text: status.set(
+                        f"Search: '{text}'" if text else "Ready."
+                    ),
+                )
             ),
         ),
+        stretchy(table),
+        count_label,
     )
 
 
@@ -396,15 +385,15 @@ def build_stats_panel(contacts: ListState):
     recompute()
 
     return VBox(
-        Group(
-            "Overview",
-            Form(
-                ("Total contacts:", Label(total.map(str))),
-                ("With email:", Label(with_email.map(str))),
-                ("With company:", Label(with_company.map(str))),
-            ),
+        Label("Overview"),
+        Form(
+            ("Total contacts:", Label(total.map(str))),
+            ("With email:", Label(with_email.map(str))),
+            ("With company:", Label(with_company.map(str))),
         ),
-        Group("By Category", MultilineEntry(text=by_category, wrapping=True, read_only=True)),
+        Separator(),
+        Label("By Category"),
+        stretchy(MultilineEntry(text=by_category, wrapping=True, read_only=True)),
     )
 
 
@@ -487,18 +476,26 @@ async def main():
 
     # Build the UI tree
     editor = build_editor(contacts, status, editing_index)
-    contact_list = build_list_panel(contacts, status, editing_index, progress)
+    contact_list = build_list_panel(contacts, status, editing_index)
     stats = build_stats_panel(contacts)
 
-    content = Tab(
+    tabs = Tab(
         (
             "Contacts",
             HBox(
                 stretchy(contact_list),
-                editor,
+                stretchy(editor),
             ),
         ),
         ("Statistics", stats),
+    )
+
+    content = VBox(
+        stretchy(tabs),
+        HBox(
+            stretchy(Label(status)),
+            ProgressBar(value=progress),
+        ),
     )
 
     app.build(

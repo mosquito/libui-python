@@ -117,6 +117,19 @@ void uninit_all_resources(void);
 
 /* -- Helpers (defined in control.c) -------------------------------- */
 
+/* Returns -1 + sets RuntimeError if the control already has a parent.
+ * Returns 0 if it is safe to set a parent. */
+static inline int
+check_no_parent(UiControlObject *child)
+{
+    if (child->control && uiControlParent(child->control) != NULL) {
+        PyErr_SetString(PyExc_RuntimeError,
+            "control already has a parent; remove it first");
+        return -1;
+    }
+    return 0;
+}
+
 int check_control(UiControlObject *self);
 int init_base(UiControlObject *self, uiControl *ctrl);
 int store_callback(UiControlObject *self, const char *key, PyObject *callable);

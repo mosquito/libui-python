@@ -55,6 +55,8 @@ PyTypeObject *TableType              = NULL;
 
 /* -- Module-level functions ---------------------------------------- */
 
+static int g_main_steps_called = 0;
+
 static PyObject *
 mod_init(PyObject *Py_UNUSED(self), PyObject *Py_UNUSED(args))
 {
@@ -83,6 +85,7 @@ mod_uninit(PyObject *Py_UNUSED(self), PyObject *Py_UNUSED(args))
     uninit_all_resources();
     Py_XDECREF(should_quit_callback);
     should_quit_callback = NULL;
+    g_main_steps_called = 0;
     uiUninit();
     Py_RETURN_NONE;
 }
@@ -108,6 +111,7 @@ mod_main_steps(PyObject *Py_UNUSED(self), PyObject *Py_UNUSED(args))
 {
     ENSURE_MAIN_THREAD;
     uiMainSteps();
+    g_main_steps_called = 1;
     Py_RETURN_NONE;
 }
 
@@ -115,6 +119,12 @@ static PyObject *
 mod_main_step(PyObject *Py_UNUSED(self), PyObject *args, PyObject *kwds)
 {
     ENSURE_MAIN_THREAD;
+    if (!g_main_steps_called) {
+        PyErr_SetString(PyExc_RuntimeError,
+            "main_step() called before main_steps(). "
+            "Call core.main_steps() first to enable stepping mode.");
+        return NULL;
+    }
     static char *kwlist[] = {"wait", NULL};
     int wait = 0;
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|p", kwlist, &wait))

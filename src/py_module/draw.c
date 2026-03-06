@@ -42,10 +42,20 @@ DrawPath_init(PyObject *self, PyObject *args, PyObject *kwds)
     return 0;
 }
 
+#define CHECK_PATH_NOT_ENDED(p)                                              \
+    do {                                                                     \
+        if (((UiDrawPathObject *)(p))->ended) {                              \
+            PyErr_SetString(PyExc_RuntimeError,                              \
+                "cannot modify a DrawPath that has been ended");             \
+            return NULL;                                                     \
+        }                                                                    \
+    } while (0)
+
 static PyObject *
 DrawPath_new_figure(PyObject *self, PyObject *args)
 {
     ENSURE_MAIN_THREAD;
+    CHECK_PATH_NOT_ENDED(self);
     double x, y;
     if (!PyArg_ParseTuple(args, "dd", &x, &y)) return NULL;
     uiDrawPathNewFigure(((UiDrawPathObject *)self)->path, x, y);
@@ -56,6 +66,7 @@ static PyObject *
 DrawPath_line_to(PyObject *self, PyObject *args)
 {
     ENSURE_MAIN_THREAD;
+    CHECK_PATH_NOT_ENDED(self);
     double x, y;
     if (!PyArg_ParseTuple(args, "dd", &x, &y)) return NULL;
     uiDrawPathLineTo(((UiDrawPathObject *)self)->path, x, y);
@@ -66,6 +77,7 @@ static PyObject *
 DrawPath_arc_to(PyObject *self, PyObject *args)
 {
     ENSURE_MAIN_THREAD;
+    CHECK_PATH_NOT_ENDED(self);
     double xc, yc, r, start, sweep;
     int neg = 0;
     if (!PyArg_ParseTuple(args, "ddddd|p", &xc, &yc, &r, &start, &sweep, &neg))
@@ -78,6 +90,7 @@ static PyObject *
 DrawPath_bezier_to(PyObject *self, PyObject *args)
 {
     ENSURE_MAIN_THREAD;
+    CHECK_PATH_NOT_ENDED(self);
     double c1x, c1y, c2x, c2y, ex, ey;
     if (!PyArg_ParseTuple(args, "dddddd", &c1x, &c1y, &c2x, &c2y, &ex, &ey))
         return NULL;
@@ -89,6 +102,7 @@ static PyObject *
 DrawPath_close_figure(PyObject *self, PyObject *Py_UNUSED(args))
 {
     ENSURE_MAIN_THREAD;
+    CHECK_PATH_NOT_ENDED(self);
     uiDrawPathCloseFigure(((UiDrawPathObject *)self)->path);
     Py_RETURN_NONE;
 }
@@ -97,6 +111,7 @@ static PyObject *
 DrawPath_add_rectangle(PyObject *self, PyObject *args)
 {
     ENSURE_MAIN_THREAD;
+    CHECK_PATH_NOT_ENDED(self);
     double x, y, w, h;
     if (!PyArg_ParseTuple(args, "dddd", &x, &y, &w, &h)) return NULL;
     uiDrawPathAddRectangle(((UiDrawPathObject *)self)->path, x, y, w, h);
@@ -108,6 +123,10 @@ DrawPath_end(PyObject *self, PyObject *Py_UNUSED(args))
 {
     ENSURE_MAIN_THREAD;
     UiDrawPathObject *p = (UiDrawPathObject *)self;
+    if (p->ended) {
+        PyErr_SetString(PyExc_RuntimeError, "DrawPath already ended");
+        return NULL;
+    }
     uiDrawPathEnd(p->path);
     p->ended = 1;
     Py_RETURN_NONE;

@@ -27,7 +27,8 @@ Tab_append(PyObject *self, PyObject *args)
         return NULL;
     UiControlObject *self_c = as_ctrl(self);
     UiControlObject *child_c = as_ctrl(child_obj);
-    if (check_control(self_c) < 0 || check_control(child_c) < 0)
+    if (check_control(self_c) < 0 || check_control(child_c) < 0
+        || check_no_parent(child_c) < 0)
         return NULL;
 
     uiTabAppend(uiTab(self_c->control), name, child_c->control);
@@ -47,8 +48,15 @@ Tab_insert_at(PyObject *self, PyObject *args)
         return NULL;
     UiControlObject *self_c = as_ctrl(self);
     UiControlObject *child_c = as_ctrl(child_obj);
-    if (check_control(self_c) < 0 || check_control(child_c) < 0)
+    if (check_control(self_c) < 0 || check_control(child_c) < 0
+        || check_no_parent(child_c) < 0)
         return NULL;
+
+    Py_ssize_t n = PyList_Size(self_c->children);
+    if (index < 0 || index > n) {
+        PyErr_SetString(PyExc_IndexError, "tab page index out of range");
+        return NULL;
+    }
 
     uiTabInsertAt(uiTab(self_c->control), name, index, child_c->control);
     child_c->owned = 0;
@@ -97,8 +105,14 @@ Tab_margined(PyObject *self, PyObject *args)
     int index;
     if (!PyArg_ParseTuple(args, "i", &index))
         return NULL;
-    if (check_control(as_ctrl(self)) < 0) return NULL;
-    return PyBool_FromLong(uiTabMargined(uiTab(as_ctrl(self)->control), index));
+    UiControlObject *c = as_ctrl(self);
+    if (check_control(c) < 0) return NULL;
+    int n = uiTabNumPages(uiTab(c->control));
+    if (index < 0 || index >= n) {
+        PyErr_SetString(PyExc_IndexError, "tab page index out of range");
+        return NULL;
+    }
+    return PyBool_FromLong(uiTabMargined(uiTab(c->control), index));
 }
 
 static PyObject *
@@ -108,8 +122,14 @@ Tab_set_margined(PyObject *self, PyObject *args)
     int index, margined;
     if (!PyArg_ParseTuple(args, "ip", &index, &margined))
         return NULL;
-    if (check_control(as_ctrl(self)) < 0) return NULL;
-    uiTabSetMargined(uiTab(as_ctrl(self)->control), index, margined);
+    UiControlObject *c2 = as_ctrl(self);
+    if (check_control(c2) < 0) return NULL;
+    int n2 = uiTabNumPages(uiTab(c2->control));
+    if (index < 0 || index >= n2) {
+        PyErr_SetString(PyExc_IndexError, "tab page index out of range");
+        return NULL;
+    }
+    uiTabSetMargined(uiTab(c2->control), index, margined);
     Py_RETURN_NONE;
 }
 

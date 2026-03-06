@@ -24,8 +24,12 @@ RadioButtons_append(PyObject *self, PyObject *args)
     const char *text;
     if (!PyArg_ParseTuple(args, "s", &text))
         return NULL;
-    if (check_control(as_ctrl(self)) < 0) return NULL;
-    uiRadioButtonsAppend(uiRadioButtons(as_ctrl(self)->control), text);
+    UiControlObject *c = as_ctrl(self);
+    if (check_control(c) < 0) return NULL;
+    uiRadioButtonsAppend(uiRadioButtons(c->control), text);
+    /* Track item count via children list (stores Python string markers) */
+    PyObject *marker = PyUnicode_FromString(text);
+    if (marker) { PyList_Append(c->children, marker); Py_DECREF(marker); }
     Py_RETURN_NONE;
 }
 
@@ -43,9 +47,16 @@ RadioButtons_set_selected(PyObject *self, PyObject *value, void *Py_UNUSED(closu
 {
     ENSURE_MAIN_THREAD_INT;
     if (check_control(as_ctrl(self)) < 0) return -1;
+    UiControlObject *c = as_ctrl(self);
     int idx = (int)PyLong_AsLong(value);
     if (idx == -1 && PyErr_Occurred()) return -1;
-    uiRadioButtonsSetSelected(uiRadioButtons(as_ctrl(self)->control), idx);
+    Py_ssize_t n = PyList_Size(c->children);
+    if (idx < -1 || idx >= n) {
+        PyErr_Format(PyExc_IndexError,
+            "radio button index %d out of range (have %zd items)", idx, n);
+        return -1;
+    }
+    uiRadioButtonsSetSelected(uiRadioButtons(c->control), idx);
     return 0;
 }
 

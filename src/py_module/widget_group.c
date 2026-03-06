@@ -71,7 +71,8 @@ Group_set_child(PyObject *self, PyObject *args)
         return NULL;
     UiControlObject *self_c = as_ctrl(self);
     UiControlObject *child_c = as_ctrl(child_obj);
-    if (check_control(self_c) < 0 || check_control(child_c) < 0)
+    if (check_control(self_c) < 0 || check_control(child_c) < 0
+        || check_no_parent(child_c) < 0)
         return NULL;
 
     uiGroupSetChild(uiGroup(self_c->control), child_c->control);

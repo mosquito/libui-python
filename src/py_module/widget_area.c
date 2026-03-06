@@ -273,6 +273,11 @@ Area_scroll_to(PyObject *self, PyObject *args)
     double x, y, w, h;
     if (!PyArg_ParseTuple(args, "dddd", &x, &y, &w, &h)) return NULL;
     if (check_control(as_ctrl(self)) < 0) return NULL;
+    if (!PyObject_IsInstance(self, (PyObject *)ScrollingAreaType)) {
+        PyErr_SetString(PyExc_RuntimeError,
+            "scroll_to() can only be called on a ScrollingArea");
+        return NULL;
+    }
     uiAreaScrollTo(uiArea(as_ctrl(self)->control), x, y, w, h);
     Py_RETURN_NONE;
 }
@@ -284,6 +289,11 @@ Area_set_size(PyObject *self, PyObject *args)
     int w, h;
     if (!PyArg_ParseTuple(args, "ii", &w, &h)) return NULL;
     if (check_control(as_ctrl(self)) < 0) return NULL;
+    if (!PyObject_IsInstance(self, (PyObject *)ScrollingAreaType)) {
+        PyErr_SetString(PyExc_RuntimeError,
+            "set_size() can only be called on a ScrollingArea");
+        return NULL;
+    }
     uiAreaSetSize(uiArea(as_ctrl(self)->control), w, h);
     Py_RETURN_NONE;
 }
