@@ -79,6 +79,12 @@ class build_ext(_build_ext):
                 ]
             )
         elif sys.platform == "win32":
+            # Disable /GL and /LTCG — setuptools enables these by default
+            # for MSVC release builds, but libui.a is compiled by meson
+            # without /GL, causing LNK1143 when the linker tries to process
+            # non-LTCG objects under /LTCG mode.
+            ext.extra_compile_args.append("/GL-")
+            ext.extra_link_args.append("/LTCG:OFF")
             ext.libraries.extend(
                 [
                     "user32",
@@ -86,11 +92,15 @@ class build_ext(_build_ext):
                     "gdi32",
                     "comctl32",
                     "uxtheme",
+                    "msimg32",
+                    "comdlg32",
                     "d2d1",
                     "dwrite",
                     "ole32",
                     "oleaut32",
+                    "oleacc",
                     "uuid",
+                    "windowscodecs",
                 ]
             )
 
