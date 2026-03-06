@@ -97,12 +97,13 @@ class _Proxy:
     _cached_props: tuple[str, ...] = ()
 
     def __init__(self, *args, _core=None, **kwargs):
-        object.__setattr__(self, '_cache', {})
+        object.__setattr__(self, "_cache", {})
         if _core is not None:
-            object.__setattr__(self, '_core', _core)
+            object.__setattr__(self, "_core", _core)
         else:
-            object.__setattr__(self, '_core',
-                               invoke_on_main(self._create_core, *args, **kwargs))
+            object.__setattr__(
+                self, "_core", invoke_on_main(self._create_core, *args, **kwargs)
+            )
         self._sync_cache()
 
     @classmethod
@@ -408,14 +409,14 @@ class Tab(_Proxy):
         return core.Tab()
 
     def append(self, name, child):
-        c = child._core if hasattr(child, '_core') else child
+        c = child._core if hasattr(child, "_core") else child
         core.queue_main(lambda: self._core.append(name, c))
 
     def delete(self, index):
         core.queue_main(lambda: self._core.delete(index))
 
     def insert_at(self, name, index, child):
-        c = child._core if hasattr(child, '_core') else child
+        c = child._core if hasattr(child, "_core") else child
         core.queue_main(lambda: self._core.insert_at(name, index, c))
 
     def set_margined(self, index, margined):
@@ -506,7 +507,7 @@ class Box(_Proxy):
     padded = _CachedProperty("padded")
 
     def append(self, child, stretchy=False):
-        c = child._core if hasattr(child, '_core') else child
+        c = child._core if hasattr(child, "_core") else child
         core.queue_main(lambda: self._core.append(c, stretchy=stretchy))
 
     def delete(self, index):
@@ -541,7 +542,7 @@ class Group(_Proxy):
         return core.Group(title)
 
     def set_child(self, child):
-        c = child._core if hasattr(child, '_core') else child
+        c = child._core if hasattr(child, "_core") else child
         core.queue_main(lambda: self._core.set_child(c))
 
 
@@ -554,7 +555,7 @@ class Form(_Proxy):
         return core.Form()
 
     def append(self, label, child, stretchy=False):
-        c = child._core if hasattr(child, '_core') else child
+        c = child._core if hasattr(child, "_core") else child
         core.queue_main(lambda: self._core.append(label, c, stretchy=stretchy))
 
     def delete(self, index):
@@ -569,11 +570,24 @@ class Grid(_Proxy):
     def _create_core(cls):
         return core.Grid()
 
-    def append(self, child, left, top, xspan=1, yspan=1,
-               hexpand=False, halign=Align.FILL, vexpand=False, valign=Align.FILL):
-        c = child._core if hasattr(child, '_core') else child
-        core.queue_main(lambda: self._core.append(
-            c, left, top, xspan, yspan, hexpand, halign, vexpand, valign))
+    def append(
+        self,
+        child,
+        left,
+        top,
+        xspan=1,
+        yspan=1,
+        hexpand=False,
+        halign=Align.FILL,
+        vexpand=False,
+        valign=Align.FILL,
+    ):
+        c = child._core if hasattr(child, "_core") else child
+        core.queue_main(
+            lambda: self._core.append(
+                c, left, top, xspan, yspan, hexpand, halign, vexpand, valign
+            )
+        )
 
     def insert_at(self, *args, **kwargs):
         core.queue_main(lambda: self._core.insert_at(*args, **kwargs))
@@ -599,7 +613,7 @@ class Window(_Proxy):
         _register_window(self)
 
     def set_child(self, child):
-        c = child._core if hasattr(child, '_core') else child
+        c = child._core if hasattr(child, "_core") else child
         core.queue_main(lambda: self._core.set_child(c))
 
     def on_closing(self, cb):
@@ -611,27 +625,27 @@ class Window(_Proxy):
 
 
 async def open_file(window):
-    w = window._core if hasattr(window, '_core') else window
+    w = window._core if hasattr(window, "_core") else window
     return await invoke_on_main_async(core.open_file, w)
 
 
 async def open_folder(window):
-    w = window._core if hasattr(window, '_core') else window
+    w = window._core if hasattr(window, "_core") else window
     return await invoke_on_main_async(core.open_folder, w)
 
 
 async def save_file(window):
-    w = window._core if hasattr(window, '_core') else window
+    w = window._core if hasattr(window, "_core") else window
     return await invoke_on_main_async(core.save_file, w)
 
 
 async def msg_box(window, title, description):
-    w = window._core if hasattr(window, '_core') else window
+    w = window._core if hasattr(window, "_core") else window
     return await invoke_on_main_async(core.msg_box, w, title, description)
 
 
 async def msg_box_error(window, title, description):
-    w = window._core if hasattr(window, '_core') else window
+    w = window._core if hasattr(window, "_core") else window
     return await invoke_on_main_async(core.msg_box_error, w, title, description)
 
 

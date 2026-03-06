@@ -17,15 +17,18 @@ class build_ext(_build_ext):
 
         # Configure meson
         if not (build_dir / "build.ninja").exists():
-            subprocess.check_call([
-                "meson", "setup",
-                str(build_dir),
-                str(LIBUI_SRC),
-                "--default-library=static",
-                "--buildtype=release",
-                "-Dtests=false",
-                "-Dexamples=false",
-            ])
+            subprocess.check_call(
+                [
+                    "meson",
+                    "setup",
+                    str(build_dir),
+                    str(LIBUI_SRC),
+                    "--default-library=static",
+                    "--buildtype=release",
+                    "-Dtests=false",
+                    "-Dexamples=false",
+                ]
+            )
 
         # Build
         subprocess.check_call(["meson", "compile", "-C", str(build_dir)])
@@ -47,29 +50,49 @@ class build_ext(_build_ext):
 
         # Platform-specific flags
         if sys.platform == "linux":
-            pkg_cflags = subprocess.check_output(
-                ["pkg-config", "--cflags", "gtk+-3.0"],
-                text=True,
-            ).strip().split()
-            pkg_libs = subprocess.check_output(
-                ["pkg-config", "--libs", "gtk+-3.0"],
-                text=True,
-            ).strip().split()
+            pkg_cflags = (
+                subprocess.check_output(
+                    ["pkg-config", "--cflags", "gtk+-3.0"],
+                    text=True,
+                )
+                .strip()
+                .split()
+            )
+            pkg_libs = (
+                subprocess.check_output(
+                    ["pkg-config", "--libs", "gtk+-3.0"],
+                    text=True,
+                )
+                .strip()
+                .split()
+            )
             ext.extra_compile_args.extend(pkg_cflags)
             ext.extra_link_args.extend(pkg_libs)
             ext.extra_link_args.extend(["-lm", "-ldl", "-lstdc++"])
         elif sys.platform == "darwin":
-            ext.extra_link_args.extend([
-                "-framework", "Cocoa",
-                "-lobjc",
-                "-lstdc++",
-            ])
+            ext.extra_link_args.extend(
+                [
+                    "-framework",
+                    "Cocoa",
+                    "-lobjc",
+                    "-lstdc++",
+                ]
+            )
         elif sys.platform == "win32":
-            ext.libraries.extend([
-                "user32", "kernel32", "gdi32", "comctl32",
-                "uxtheme", "d2d1", "dwrite",
-                "ole32", "oleaut32", "uuid",
-            ])
+            ext.libraries.extend(
+                [
+                    "user32",
+                    "kernel32",
+                    "gdi32",
+                    "comctl32",
+                    "uxtheme",
+                    "d2d1",
+                    "dwrite",
+                    "ole32",
+                    "oleaut32",
+                    "uuid",
+                ]
+            )
 
         super().build_extension(ext)
 

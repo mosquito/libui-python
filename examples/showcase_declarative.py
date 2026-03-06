@@ -56,11 +56,13 @@ from libui.declarative import (
 
 # ── Reusable components ─────────────────────────────────────────────
 
+
 def StatusPanel(status: State[str]) -> Label:
     return Label(text=status)
 
 
 # ── Tab 0: Basic Controls ───────────────────────────────────────────
+
 
 def build_basic_tab(app: App):
     status = State("Interact with the controls below.")
@@ -73,47 +75,93 @@ def build_basic_tab(app: App):
 
     return VBox(
         StatusPanel(status),
-        Group("Text Entry", Form(
-            ("Normal:", Entry(
-                read_only=read_only,
-                on_changed=lambda text: status.set(f"Normal entry: {text}"),
-            )),
-            ("Password:", Entry(
-                type="password", read_only=read_only,
-                on_changed=lambda text: status.set(
-                    f"Password entry changed (len={len(text)})"),
-            )),
-            ("Search:", Entry(
-                type="search", read_only=read_only,
-                on_changed=lambda text: status.set(f"Search entry: {text}"),
-            )),
-        )),
+        Group(
+            "Text Entry",
+            Form(
+                (
+                    "Normal:",
+                    Entry(
+                        read_only=read_only,
+                        on_changed=lambda text: status.set(f"Normal entry: {text}"),
+                    ),
+                ),
+                (
+                    "Password:",
+                    Entry(
+                        type="password",
+                        read_only=read_only,
+                        on_changed=lambda text: status.set(
+                            f"Password entry changed (len={len(text)})"
+                        ),
+                    ),
+                ),
+                (
+                    "Search:",
+                    Entry(
+                        type="search",
+                        read_only=read_only,
+                        on_changed=lambda text: status.set(f"Search entry: {text}"),
+                    ),
+                ),
+            ),
+        ),
         Separator(),
-        Group("Buttons & Checkboxes", HBox(
-            stretchy(VBox(
-                Button("Click Me", on_clicked=on_click),
-                Button("Reset", on_clicked=lambda: status.set(
-                    "Interact with the controls below.")),
-                Checkbox("Enable feature", on_toggled=lambda checked: status.set(
-                    f"Feature {'enabled' if checked else 'disabled'}")),
-                Checkbox("Read-only entries", on_toggled=lambda checked: (
-                    read_only.set(checked),
-                    status.set(f"Entries are {'read-only' if checked else 'editable'}"),
-                )),
-            )),
-            stretchy(VBox(
-                Checkbox("Borderless window", on_toggled=lambda checked: (
-                    setattr(app.window, "borderless", checked)
-                    if app.window else None)),
-                Checkbox("Fullscreen", on_toggled=lambda checked: (
-                    setattr(app.window, "fullscreen", checked)
-                    if app.window else None)),
-            )),
-        )),
+        Group(
+            "Buttons & Checkboxes",
+            HBox(
+                stretchy(
+                    VBox(
+                        Button("Click Me", on_clicked=on_click),
+                        Button(
+                            "Reset",
+                            on_clicked=lambda: status.set(
+                                "Interact with the controls below."
+                            ),
+                        ),
+                        Checkbox(
+                            "Enable feature",
+                            on_toggled=lambda checked: status.set(
+                                f"Feature {'enabled' if checked else 'disabled'}"
+                            ),
+                        ),
+                        Checkbox(
+                            "Read-only entries",
+                            on_toggled=lambda checked: (
+                                read_only.set(checked),
+                                status.set(
+                                    f"Entries are {'read-only' if checked else 'editable'}"
+                                ),
+                            ),
+                        ),
+                    )
+                ),
+                stretchy(
+                    VBox(
+                        Checkbox(
+                            "Borderless window",
+                            on_toggled=lambda checked: (
+                                setattr(app.window, "borderless", checked)
+                                if app.window
+                                else None
+                            ),
+                        ),
+                        Checkbox(
+                            "Fullscreen",
+                            on_toggled=lambda checked: (
+                                setattr(app.window, "fullscreen", checked)
+                                if app.window
+                                else None
+                            ),
+                        ),
+                    )
+                ),
+            ),
+        ),
     )
 
 
 # ── Tab 1: Selectors & Numbers ──────────────────────────────────────
+
 
 def build_selectors_tab():
     status = State("Adjust the controls below.")
@@ -125,33 +173,51 @@ def build_selectors_tab():
 
     return VBox(
         StatusPanel(status),
-        Group("Numeric Controls", Form(
-            ("Slider:", Slider(0, 100, value=value)),
-            ("Spinbox:", Spinbox(0, 100, value=value)),
-            ("Progress:", ProgressBar(value=value)),
-        )),
+        Group(
+            "Numeric Controls",
+            Form(
+                ("Slider:", Slider(0, 100, value=value)),
+                ("Spinbox:", Spinbox(0, 100, value=value)),
+                ("Progress:", ProgressBar(value=value)),
+            ),
+        ),
         Separator(),
-        Group("Selection Controls", Form(
-            ("Quality:", RadioButtons(
-                items=radio_labels,
-                on_selected=lambda idx: status.set(
-                    f"Radio: {radio_labels[idx]}" if idx >= 0 else "Radio: none"),
-            )),
-            ("Color:", Combobox(
-                items=combo_items, selected=0,
-                on_selected=lambda idx: status.set(
-                    f"Combobox: {combo_items[idx]}"),
-            )),
-            ("Fruit:", EditableCombobox(
-                items=["Apple", "Banana", "Cherry"],
-                on_changed=lambda text: status.set(
-                    f"EditableCombobox: {text}"),
-            )),
-        )),
+        Group(
+            "Selection Controls",
+            Form(
+                (
+                    "Quality:",
+                    RadioButtons(
+                        items=radio_labels,
+                        on_selected=lambda idx: status.set(
+                            f"Radio: {radio_labels[idx]}" if idx >= 0 else "Radio: none"
+                        ),
+                    ),
+                ),
+                (
+                    "Color:",
+                    Combobox(
+                        items=combo_items,
+                        selected=0,
+                        on_selected=lambda idx: status.set(
+                            f"Combobox: {combo_items[idx]}"
+                        ),
+                    ),
+                ),
+                (
+                    "Fruit:",
+                    EditableCombobox(
+                        items=["Apple", "Banana", "Cherry"],
+                        on_changed=lambda text: status.set(f"EditableCombobox: {text}"),
+                    ),
+                ),
+            ),
+        ),
     )
 
 
 # ── Tab 2: Rich Input ───────────────────────────────────────────────
+
 
 def build_rich_input_tab():
     pick_status = State("Pick a value to see it here.")
@@ -174,76 +240,134 @@ def build_rich_input_tab():
             mle.widget.text = ""
 
     return HBox(
-        stretchy(Group("Multiline Entry", VBox(
-            stretchy(mle),
-            HBox(
-                Button("Append Text", on_clicked=do_append),
-                Button("Clear", on_clicked=do_clear),
-                Checkbox("Read Only", on_toggled=lambda checked: mle_read_only.set(checked)),
-            ),
-        ))),
-        stretchy(Group("Pickers", VBox(
-            stretchy(Form(
-                ("Color:", ColorButton(
-                    on_changed=lambda color: pick_status.set(
-                        "Color: R={:.2f} G={:.2f} B={:.2f} A={:.2f}".format(*color)),
-                )),
-                ("Font:", FontButton(
-                    on_changed=lambda font: pick_status.set(
-                        "Font: {family} {size}pt".format(**font)),
-                )),
-                ("Date & Time:", DateTimePicker(
-                    on_changed=lambda time: pick_status.set(
-                        "DateTime: {0:04d}-{1:02d}-{2:02d} {3:02d}:{4:02d}:{5:02d}".format(
-                            *time[:6])),
-                )),
-                ("Date:", DateTimePicker(
-                    type="date",
-                    on_changed=lambda time: pick_status.set(
-                        "Date: {0:04d}-{1:02d}-{2:02d}".format(*time[:3])),
-                )),
-                ("Time:", DateTimePicker(
-                    type="time",
-                    on_changed=lambda time: pick_status.set(
-                        "Time: {3:02d}:{4:02d}:{5:02d}".format(*time[:6])),
-                )),
-            )),
-            Label(text=pick_status),
-        ))),
+        stretchy(
+            Group(
+                "Multiline Entry",
+                VBox(
+                    stretchy(mle),
+                    HBox(
+                        Button("Append Text", on_clicked=do_append),
+                        Button("Clear", on_clicked=do_clear),
+                        Checkbox(
+                            "Read Only",
+                            on_toggled=lambda checked: mle_read_only.set(checked),
+                        ),
+                    ),
+                ),
+            )
+        ),
+        stretchy(
+            Group(
+                "Pickers",
+                VBox(
+                    stretchy(
+                        Form(
+                            (
+                                "Color:",
+                                ColorButton(
+                                    on_changed=lambda color: pick_status.set(
+                                        "Color: R={:.2f} G={:.2f} B={:.2f} A={:.2f}".format(
+                                            *color
+                                        )
+                                    ),
+                                ),
+                            ),
+                            (
+                                "Font:",
+                                FontButton(
+                                    on_changed=lambda font: pick_status.set(
+                                        "Font: {family} {size}pt".format(**font)
+                                    ),
+                                ),
+                            ),
+                            (
+                                "Date & Time:",
+                                DateTimePicker(
+                                    on_changed=lambda time: pick_status.set(
+                                        "DateTime: {0:04d}-{1:02d}-{2:02d} {3:02d}:{4:02d}:{5:02d}".format(
+                                            *time[:6]
+                                        )
+                                    ),
+                                ),
+                            ),
+                            (
+                                "Date:",
+                                DateTimePicker(
+                                    type="date",
+                                    on_changed=lambda time: pick_status.set(
+                                        "Date: {0:04d}-{1:02d}-{2:02d}".format(
+                                            *time[:3]
+                                        )
+                                    ),
+                                ),
+                            ),
+                            (
+                                "Time:",
+                                DateTimePicker(
+                                    type="time",
+                                    on_changed=lambda time: pick_status.set(
+                                        "Time: {3:02d}:{4:02d}:{5:02d}".format(
+                                            *time[:6]
+                                        )
+                                    ),
+                                ),
+                            ),
+                        )
+                    ),
+                    Label(text=pick_status),
+                ),
+            )
+        ),
     )
 
 
 # ── Tab 3: Layout ───────────────────────────────────────────────────
 
+
 def build_layout_tab():
     return VBox(
-        Group("Grid Layout", Grid(
-            GridCell(Label("Name:"), 0, 0, halign=libui.Align.END),
-            GridCell(Entry(), 1, 0, hexpand=True),
-            GridCell(Label("Email:"), 0, 1, halign=libui.Align.END),
-            GridCell(Entry(), 1, 1, hexpand=True),
-            GridCell(Button("Submit"), 0, 2, xspan=2, halign=libui.Align.CENTER),
-            padded=True,
-        )),
+        Group(
+            "Grid Layout",
+            Grid(
+                GridCell(Label("Name:"), 0, 0, halign=libui.Align.END),
+                GridCell(Entry(), 1, 0, hexpand=True),
+                GridCell(Label("Email:"), 0, 1, halign=libui.Align.END),
+                GridCell(Entry(), 1, 1, hexpand=True),
+                GridCell(Button("Submit"), 0, 2, xspan=2, halign=libui.Align.CENTER),
+                padded=True,
+            ),
+        ),
         Separator(),
-        Group("Form Layout", Form(
-            ("Username:", Entry()),
-            ("Password:", Entry(type="password")),
-            ("Role:", Combobox(items=["Admin", "Editor", "Viewer"], selected=0)),
-            ("Bio:", MultilineEntry(wrapping=True), True),
-        )),
+        Group(
+            "Form Layout",
+            Form(
+                ("Username:", Entry()),
+                ("Password:", Entry(type="password")),
+                ("Role:", Combobox(items=["Admin", "Editor", "Viewer"], selected=0)),
+                ("Bio:", MultilineEntry(wrapping=True), True),
+            ),
+        ),
         Separator(),
-        Group("Nested Boxes", HBox(
-            *[stretchy(VBox(
-                Label(f"Column {c}"),
-                Button(f"Btn {c}"),
-                ProgressBar(),
-            )) for c in ("A", "B", "C")]
-        )),
+        Group(
+            "Nested Boxes",
+            HBox(
+                *[
+                    stretchy(
+                        VBox(
+                            Label(f"Column {c}"),
+                            Button(f"Btn {c}"),
+                            ProgressBar(),
+                        )
+                    )
+                    for c in ("A", "B", "C")
+                ]
+            ),
+        ),
     )
 
 
 # ── Tab 4: Drawing ──────────────────────────────────────────────────
+
 
 def _on_draw(ctx, area_w, area_h, clip_x, clip_y, clip_w, clip_h):
     _draw_filled_shapes(ctx)
@@ -289,11 +413,13 @@ def _draw_gradients(ctx):
     lb.type = libui.BrushType.LINEAR_GRADIENT
     lb.x0, lb.y0 = ox, oy
     lb.x1, lb.y1 = ox + 150, oy + 70
-    lb.set_stops([
-        (0.0, 1.0, 0.0, 0.0, 1.0),
-        (0.5, 1.0, 1.0, 0.0, 1.0),
-        (1.0, 0.0, 0.0, 1.0, 1.0),
-    ])
+    lb.set_stops(
+        [
+            (0.0, 1.0, 0.0, 0.0, 1.0),
+            (0.5, 1.0, 1.0, 0.0, 1.0),
+            (1.0, 0.0, 0.0, 1.0, 1.0),
+        ]
+    )
     ctx.fill(p, lb)
 
     cx, cy, r = ox + 75, oy + 130, 40
@@ -305,10 +431,12 @@ def _draw_gradients(ctx):
     rb.x0, rb.y0 = cx, cy
     rb.x1, rb.y1 = cx, cy
     rb.outer_radius = r
-    rb.set_stops([
-        (0.0, 1.0, 1.0, 1.0, 1.0),
-        (1.0, 0.2, 0.0, 0.6, 1.0),
-    ])
+    rb.set_stops(
+        [
+            (0.0, 1.0, 1.0, 1.0, 1.0),
+            (1.0, 0.2, 0.0, 0.6, 1.0),
+        ]
+    )
     ctx.fill(p2, rb)
 
 
@@ -423,19 +551,70 @@ def build_drawing_tab():
 
 # ── Tab 5: Data Table ───────────────────────────────────────────────
 
+
 def build_table_tab(app: App):
     status = State("Table events appear here.")
 
-    data = ListState([
-        {"checked": 1, "name": "Alice Johnson", "role": "Engineer", "score": 85, "action": "Details"},
-        {"checked": 0, "name": "Bob Smith", "role": "Designer", "score": 72, "action": "Details"},
-        {"checked": 1, "name": "Carol White", "role": "Manager", "score": 90, "action": "Details"},
-        {"checked": 0, "name": "Dave Brown", "role": "Intern", "score": 45, "action": "Details"},
-        {"checked": 1, "name": "Eve Davis", "role": "Engineer", "score": 95, "action": "Details"},
-        {"checked": 0, "name": "Frank Miller", "role": "Analyst", "score": 68, "action": "Details"},
-        {"checked": 1, "name": "Grace Lee", "role": "Lead", "score": 88, "action": "Details"},
-        {"checked": 0, "name": "Hank Wilson", "role": "QA", "score": 77, "action": "Details"},
-    ])
+    data = ListState(
+        [
+            {
+                "checked": 1,
+                "name": "Alice Johnson",
+                "role": "Engineer",
+                "score": 85,
+                "action": "Details",
+            },
+            {
+                "checked": 0,
+                "name": "Bob Smith",
+                "role": "Designer",
+                "score": 72,
+                "action": "Details",
+            },
+            {
+                "checked": 1,
+                "name": "Carol White",
+                "role": "Manager",
+                "score": 90,
+                "action": "Details",
+            },
+            {
+                "checked": 0,
+                "name": "Dave Brown",
+                "role": "Intern",
+                "score": 45,
+                "action": "Details",
+            },
+            {
+                "checked": 1,
+                "name": "Eve Davis",
+                "role": "Engineer",
+                "score": 95,
+                "action": "Details",
+            },
+            {
+                "checked": 0,
+                "name": "Frank Miller",
+                "role": "Analyst",
+                "score": 68,
+                "action": "Details",
+            },
+            {
+                "checked": 1,
+                "name": "Grace Lee",
+                "role": "Lead",
+                "score": 88,
+                "action": "Details",
+            },
+            {
+                "checked": 0,
+                "name": "Hank Wilson",
+                "role": "QA",
+                "score": 77,
+                "action": "Details",
+            },
+        ]
+    )
 
     add_counter = State(len(data))
 
@@ -451,23 +630,28 @@ def build_table_tab(app: App):
         ProgressColumn("Score", key="score"),
         ButtonColumn("Action", text_key="action", on_click=on_button_click),
         on_row_clicked=lambda row: status.set(
-            f"Clicked row {row}: {data[row]['name']}" if row < len(data) else ""),
+            f"Clicked row {row}: {data[row]['name']}" if row < len(data) else ""
+        ),
         on_row_double_clicked=lambda row: status.set(
-            f"Double-clicked row {row}: {data[row]['name']}" if row < len(data) else ""),
+            f"Double-clicked row {row}: {data[row]['name']}" if row < len(data) else ""
+        ),
         on_header_clicked=lambda col: status.set(f"Header clicked: column {col}"),
         on_selection_changed=lambda: status.set(
-            f"Selection: {table.widget.selection}" if table.widget else ""),
+            f"Selection: {table.widget.selection}" if table.widget else ""
+        ),
     )
 
     def do_add():
         add_counter.update(lambda x: x + 1)
-        data.append({
-            "checked": 0,
-            "name": f"New Person {add_counter.value}",
-            "role": "New",
-            "score": 50,
-            "action": "Details",
-        })
+        data.append(
+            {
+                "checked": 0,
+                "name": f"New Person {add_counter.value}",
+                "role": "New",
+                "score": 50,
+                "action": "Details",
+            }
+        )
         status.set(f"Added row {len(data) - 1}")
 
     def do_remove():
@@ -488,6 +672,7 @@ def build_table_tab(app: App):
 
 
 # ── Menus ────────────────────────────────────────────────────────────
+
 
 def build_menus(app: App):
     toggle_state = State(False)
@@ -512,23 +697,27 @@ def build_menus(app: App):
         app.msg_box("Toggle Feature", f"Feature is now {state}")
 
     def do_docs():
-        app.msg_box("Documentation",
-                     "Visit the python-libui-ng repository for full docs.")
+        app.msg_box(
+            "Documentation", "Visit the python-libui-ng repository for full docs."
+        )
 
     return [
-        MenuDef("File",
+        MenuDef(
+            "File",
             MenuItem("Open File...", on_click=do_open),
             MenuItem("Open Folder...", on_click=do_open_folder),
             MenuItem("Save As...", on_click=do_save),
             MenuSeparator(),
             QuitItem(),
         ),
-        MenuDef("Edit",
+        MenuDef(
+            "Edit",
             PreferencesItem(),
             MenuSeparator(),
             CheckMenuItem("Toggle Feature", checked=toggle_state, on_click=do_toggle),
         ),
-        MenuDef("Help",
+        MenuDef(
+            "Help",
             AboutItem(),
             MenuItem("Documentation", on_click=do_docs),
         ),
@@ -536,6 +725,7 @@ def build_menus(app: App):
 
 
 # ── Main ─────────────────────────────────────────────────────────────
+
 
 async def main():
     app = App()
@@ -552,7 +742,9 @@ async def main():
     app.build(
         menus=build_menus(app),
         window=Window(
-            "Python libui-ng Showcase", 900, 700,
+            "Python libui-ng Showcase",
+            900,
+            700,
             child=content,
             has_menubar=True,
         ),

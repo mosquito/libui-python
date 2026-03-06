@@ -1,6 +1,5 @@
 """Tests for the asyncio integration loop."""
 
-
 from libui import core
 
 

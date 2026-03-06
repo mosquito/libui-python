@@ -16,6 +16,7 @@ import libui
 
 # ── Menus (must be created BEFORE the Window) ───────────────────────
 
+
 def build_menus(window_ref):
     """Build application menus. Returns list of refs to keep alive."""
     refs = []
@@ -98,11 +99,13 @@ def _do_docs(wref):
     w = wref[0]
     if w is None:
         return
-    libui.msg_box(w, "Documentation",
-               "Visit the python-libui-ng repository for full docs.")
+    libui.msg_box(
+        w, "Documentation", "Visit the python-libui-ng repository for full docs."
+    )
 
 
 # ── Tab 0: Basic Controls ───────────────────────────────────────────
+
 
 def build_basic_tab(window):
     vbox = libui.VerticalBox(padded=True)
@@ -123,12 +126,17 @@ def build_basic_tab(window):
     entry_search = libui.Entry(type="search")
     entries = [entry_normal, entry_password, entry_search]
 
-    entry_normal.on_changed(lambda: _update_status(
-        status, f"Normal entry: {entry_normal.text}"))
-    entry_password.on_changed(lambda: _update_status(
-        status, f"Password entry changed (len={len(entry_password.text)})"))
-    entry_search.on_changed(lambda: _update_status(
-        status, f"Search entry: {entry_search.text}"))
+    entry_normal.on_changed(
+        lambda: _update_status(status, f"Normal entry: {entry_normal.text}")
+    )
+    entry_password.on_changed(
+        lambda: _update_status(
+            status, f"Password entry changed (len={len(entry_password.text)})"
+        )
+    )
+    entry_search.on_changed(
+        lambda: _update_status(status, f"Search entry: {entry_search.text}")
+    )
 
     form.append("Normal:", entry_normal)
     form.append("Password:", entry_password)
@@ -161,13 +169,17 @@ def build_basic_tab(window):
     left_col.append(btn_click)
 
     btn_reset = libui.Button("Reset")
-    btn_reset.on_clicked(lambda: _update_status(
-        status, "Interact with the controls below."))
+    btn_reset.on_clicked(
+        lambda: _update_status(status, "Interact with the controls below.")
+    )
     left_col.append(btn_reset)
 
     cb_feature = libui.Checkbox("Enable feature")
-    cb_feature.on_toggled(lambda: _update_status(
-        status, f"Feature {'enabled' if cb_feature.checked else 'disabled'}"))
+    cb_feature.on_toggled(
+        lambda: _update_status(
+            status, f"Feature {'enabled' if cb_feature.checked else 'disabled'}"
+        )
+    )
     left_col.append(cb_feature)
 
     cb_readonly = libui.Checkbox("Read-only entries")
@@ -184,12 +196,14 @@ def build_basic_tab(window):
     # Right column: window toggles
     cb_borderless = libui.Checkbox("Borderless window")
     cb_borderless.on_toggled(
-        lambda: setattr(window, 'borderless', cb_borderless.checked))
+        lambda: setattr(window, "borderless", cb_borderless.checked)
+    )
     right_col.append(cb_borderless)
 
     cb_fullscreen = libui.Checkbox("Fullscreen")
     cb_fullscreen.on_toggled(
-        lambda: setattr(window, 'fullscreen', cb_fullscreen.checked))
+        lambda: setattr(window, "fullscreen", cb_fullscreen.checked)
+    )
     right_col.append(cb_fullscreen)
 
     return vbox
@@ -200,6 +214,7 @@ def _update_status(label, text):
 
 
 # ── Tab 1: Selectors & Numbers ──────────────────────────────────────
+
 
 def build_selectors_tab():
     vbox = libui.VerticalBox(padded=True)
@@ -263,22 +278,23 @@ def build_selectors_tab():
     for label in ("Low", "Medium", "High", "Ultra"):
         radio.append(label)
     radio_labels = ["Low", "Medium", "High", "Ultra"]
-    radio.on_selected(lambda: _update_status(
-        status, f"Radio: {radio_labels[radio.selected]}"))
+    radio.on_selected(
+        lambda: _update_status(status, f"Radio: {radio_labels[radio.selected]}")
+    )
 
     combo = libui.Combobox()
     combo_items = ["Red", "Green", "Blue", "Yellow"]
     for item in combo_items:
         combo.append(item)
     combo.selected = 0
-    combo.on_selected(lambda: _update_status(
-        status, f"Combobox: {combo_items[combo.selected]}"))
+    combo.on_selected(
+        lambda: _update_status(status, f"Combobox: {combo_items[combo.selected]}")
+    )
 
     ecb = libui.EditableCombobox()
     for item in ("Apple", "Banana", "Cherry"):
         ecb.append(item)
-    ecb.on_changed(lambda: _update_status(
-        status, f"EditableCombobox: {ecb.text}"))
+    ecb.on_changed(lambda: _update_status(status, f"EditableCombobox: {ecb.text}"))
 
     sel_form.append("Quality:", radio)
     sel_form.append("Color:", combo)
@@ -288,6 +304,7 @@ def build_selectors_tab():
 
 
 # ── Tab 2: Rich Input ───────────────────────────────────────────────
+
 
 def build_rich_input_tab():
     hbox = libui.HorizontalBox(padded=True)
@@ -318,11 +335,11 @@ def build_rich_input_tab():
     ml_btn_box.append(btn_append)
 
     btn_clear = libui.Button("Clear")
-    btn_clear.on_clicked(lambda: setattr(mle, 'text', ''))
+    btn_clear.on_clicked(lambda: setattr(mle, "text", ""))
     ml_btn_box.append(btn_clear)
 
     cb_ml_ro = libui.Checkbox("Read Only")
-    cb_ml_ro.on_toggled(lambda: setattr(mle, 'read_only', cb_ml_ro.checked))
+    cb_ml_ro.on_toggled(lambda: setattr(mle, "read_only", cb_ml_ro.checked))
     ml_btn_box.append(cb_ml_ro)
 
     # Right: Pickers
@@ -340,31 +357,43 @@ def build_rich_input_tab():
     pick_vbox.append(pick_status)
 
     color_btn = libui.ColorButton()
-    color_btn.on_changed(lambda: _update_status(
-        pick_status,
-        "Color: R={:.2f} G={:.2f} B={:.2f} A={:.2f}".format(
-            *color_btn.color)))
+    color_btn.on_changed(
+        lambda: _update_status(
+            pick_status,
+            "Color: R={:.2f} G={:.2f} B={:.2f} A={:.2f}".format(*color_btn.color),
+        )
+    )
 
     font_btn = libui.FontButton()
-    font_btn.on_changed(lambda: _update_status(
-        pick_status,
-        "Font: {family} {size}pt".format(**font_btn.font)))
+    font_btn.on_changed(
+        lambda: _update_status(
+            pick_status, "Font: {family} {size}pt".format(**font_btn.font)
+        )
+    )
 
     dtp_full = libui.DateTimePicker()
-    dtp_full.on_changed(lambda: _update_status(
-        pick_status,
-        "DateTime: {0:04d}-{1:02d}-{2:02d} {3:02d}:{4:02d}:{5:02d}".format(
-            *dtp_full.time[:6])))
+    dtp_full.on_changed(
+        lambda: _update_status(
+            pick_status,
+            "DateTime: {0:04d}-{1:02d}-{2:02d} {3:02d}:{4:02d}:{5:02d}".format(
+                *dtp_full.time[:6]
+            ),
+        )
+    )
 
     dtp_date = libui.DateTimePicker(type="date")
-    dtp_date.on_changed(lambda: _update_status(
-        pick_status,
-        "Date: {0:04d}-{1:02d}-{2:02d}".format(*dtp_date.time[:3])))
+    dtp_date.on_changed(
+        lambda: _update_status(
+            pick_status, "Date: {0:04d}-{1:02d}-{2:02d}".format(*dtp_date.time[:3])
+        )
+    )
 
     dtp_time = libui.DateTimePicker(type="time")
-    dtp_time.on_changed(lambda: _update_status(
-        pick_status,
-        "Time: {3:02d}:{4:02d}:{5:02d}".format(*dtp_time.time[:6])))
+    dtp_time.on_changed(
+        lambda: _update_status(
+            pick_status, "Time: {3:02d}:{4:02d}:{5:02d}".format(*dtp_time.time[:6])
+        )
+    )
 
     pick_form.append("Color:", color_btn)
     pick_form.append("Font:", font_btn)
@@ -376,6 +405,7 @@ def build_rich_input_tab():
 
 
 # ── Tab 3: Layout ───────────────────────────────────────────────────
+
 
 def build_layout_tab():
     vbox = libui.VerticalBox(padded=True)
@@ -396,10 +426,14 @@ def build_layout_tab():
     lbl_email = libui.Label("Email:")
     entry_email = libui.Entry()
     grid.append(lbl_email, 0, 1, 1, 1, False, libui.Align.END, False, libui.Align.FILL)
-    grid.append(entry_email, 1, 1, 1, 1, True, libui.Align.FILL, False, libui.Align.FILL)
+    grid.append(
+        entry_email, 1, 1, 1, 1, True, libui.Align.FILL, False, libui.Align.FILL
+    )
 
     btn_submit = libui.Button("Submit")
-    grid.append(btn_submit, 0, 2, 2, 1, False, libui.Align.CENTER, False, libui.Align.FILL)
+    grid.append(
+        btn_submit, 0, 2, 2, 1, False, libui.Align.CENTER, False, libui.Align.FILL
+    )
 
     vbox.append(libui.Separator())
 
@@ -443,6 +477,7 @@ def build_layout_tab():
 
 
 # ── Tab 4: Drawing ──────────────────────────────────────────────────
+
 
 def build_drawing_tab():
     vbox = libui.VerticalBox(padded=True)
@@ -500,11 +535,13 @@ def _draw_gradients(ctx):
     lb.type = libui.BrushType.LINEAR_GRADIENT
     lb.x0, lb.y0 = ox, oy
     lb.x1, lb.y1 = ox + 150, oy + 70
-    lb.set_stops([
-        (0.0, 1.0, 0.0, 0.0, 1.0),
-        (0.5, 1.0, 1.0, 0.0, 1.0),
-        (1.0, 0.0, 0.0, 1.0, 1.0),
-    ])
+    lb.set_stops(
+        [
+            (0.0, 1.0, 0.0, 0.0, 1.0),
+            (0.5, 1.0, 1.0, 0.0, 1.0),
+            (1.0, 0.0, 0.0, 1.0, 1.0),
+        ]
+    )
     ctx.fill(p, lb)
 
     # Radial gradient circle
@@ -518,10 +555,12 @@ def _draw_gradients(ctx):
     rb.x0, rb.y0 = cx, cy
     rb.x1, rb.y1 = cx, cy
     rb.outer_radius = r
-    rb.set_stops([
-        (0.0, 1.0, 1.0, 1.0, 1.0),
-        (1.0, 0.2, 0.0, 0.6, 1.0),
-    ])
+    rb.set_stops(
+        [
+            (0.0, 1.0, 1.0, 1.0, 1.0),
+            (1.0, 0.2, 0.0, 0.6, 1.0),
+        ]
+    )
     ctx.fill(p2, rb)
 
 
@@ -532,8 +571,7 @@ def _draw_stroke_styles(ctx):
     black.r, black.g, black.b, black.a = 0.0, 0.0, 0.0, 1.0
 
     # Line cap styles: FLAT, ROUND, SQUARE
-    caps = [libui.LineCap.FLAT, libui.LineCap.ROUND,
-            libui.LineCap.SQUARE]
+    caps = [libui.LineCap.FLAT, libui.LineCap.ROUND, libui.LineCap.SQUARE]
     cap_names = ["Flat", "Round", "Square"]
     for i, (cap, name) in enumerate(zip(caps, cap_names)):
         y = y_base + i * 25
@@ -553,8 +591,7 @@ def _draw_stroke_styles(ctx):
         ctx.text(layout, 155, y - 6)
 
     # Line join styles: MITER, ROUND, BEVEL
-    joins = [libui.LineJoin.MITER, libui.LineJoin.ROUND,
-             libui.LineJoin.BEVEL]
+    joins = [libui.LineJoin.MITER, libui.LineJoin.ROUND, libui.LineJoin.BEVEL]
     join_names = ["Miter", "Round", "Bevel"]
     for i, (join, name) in enumerate(zip(joins, join_names)):
         x_off = 230 + i * 70
@@ -629,8 +666,7 @@ def _draw_attributed_text(ctx, area_w):
     astr.set_attribute(libui.underline_attribute(libui.Underline.SINGLE), 20, 30)
 
     # Background highlight: "Highlight" (31..40)
-    astr.set_attribute(
-        libui.background_attribute(1.0, 1.0, 0.0, 0.5), 31, 40)
+    astr.set_attribute(libui.background_attribute(1.0, 1.0, 0.0, 0.5), 31, 40)
 
     # Custom family: "Family" (41..47)
     astr.set_attribute(libui.family_attribute("serif"), 41, 47)
@@ -665,6 +701,7 @@ def _draw_rotated_rect(ctx):
 
 
 # ── Tab 5: Data Table ───────────────────────────────────────────────
+
 
 def build_table_tab(window):
     vbox = libui.VerticalBox(padded=True)
@@ -708,30 +745,32 @@ def build_table_tab(window):
         elif col == 4:
             name = data[row][1]
             role = data[row][2]
-            libui.msg_box(window, "Details",
-                       f"{name} — {role}\nScore: {data[row][3]}")
+            libui.msg_box(window, "Details", f"{name} — {role}\nScore: {data[row][3]}")
 
     model = libui.TableModel(
-        num_columns, column_type, num_rows, cell_value, set_cell_value)
+        num_columns, column_type, num_rows, cell_value, set_cell_value
+    )
 
     table = libui.Table(model)
     table.append_checkbox_text_column(
-        "Employee", 0, libui.TableModelColumn.ALWAYS_EDITABLE, 1)
+        "Employee", 0, libui.TableModelColumn.ALWAYS_EDITABLE, 1
+    )
     table.append_text_column("Role", 2)
     table.append_progress_bar_column("Score", 3)
-    table.append_button_column(
-        "Action", 4, libui.TableModelColumn.ALWAYS_EDITABLE)
+    table.append_button_column("Action", 4, libui.TableModelColumn.ALWAYS_EDITABLE)
 
     table.on_row_clicked(
-        lambda row: _update_status(status, f"Clicked row {row}: {data[row][1]}"))
+        lambda row: _update_status(status, f"Clicked row {row}: {data[row][1]}")
+    )
     table.on_row_double_clicked(
-        lambda row: _update_status(
-            status, f"Double-clicked row {row}: {data[row][1]}"))
+        lambda row: _update_status(status, f"Double-clicked row {row}: {data[row][1]}")
+    )
     table.on_header_clicked(
-        lambda col: _update_status(
-            status, f"Header clicked: column {col}"))
+        lambda col: _update_status(status, f"Header clicked: column {col}")
+    )
     table.on_selection_changed(
-        lambda: _update_status(status, f"Selection: {table.selection}"))
+        lambda: _update_status(status, f"Selection: {table.selection}")
+    )
 
     vbox.append(table, stretchy=True)
 
@@ -770,6 +809,7 @@ def build_table_tab(window):
 
 
 # ── Main ─────────────────────────────────────────────────────────────
+
 
 async def main():
     window_ref = [None]

@@ -12,6 +12,7 @@ from libui.loop import _ensure_sync
 
 # ── Helpers ──────────────────────────────────────────────────────────
 
+
 def _resolve(val):
     """Return the plain value from a State/Computed or pass through."""
     if isinstance(val, (State, Computed)):
@@ -20,6 +21,7 @@ def _resolve(val):
 
 
 # ── Containers ───────────────────────────────────────────────────────
+
 
 class VBox(Node):
     """Vertical box container."""
@@ -132,10 +134,14 @@ class GridCell:
     def __init__(
         self,
         child: Node,
-        left: int, top: int,
-        xspan: int = 1, yspan: int = 1,
-        hexpand: bool = False, halign=core.Align.FILL,
-        vexpand: bool = False, valign=core.Align.FILL,
+        left: int,
+        top: int,
+        xspan: int = 1,
+        yspan: int = 1,
+        hexpand: bool = False,
+        halign=core.Align.FILL,
+        vexpand: bool = False,
+        valign=core.Align.FILL,
     ):
         self.child = child
         self.left = left
@@ -163,14 +169,20 @@ class Grid(Node):
         for c in self._cells:
             c.child.build(ctx)
             widget.append(
-                c.child.widget, c.left, c.top,
-                c.xspan, c.yspan,
-                c.hexpand, c.halign,
-                c.vexpand, c.valign,
+                c.child.widget,
+                c.left,
+                c.top,
+                c.xspan,
+                c.yspan,
+                c.hexpand,
+                c.halign,
+                c.vexpand,
+                c.valign,
             )
 
 
 # ── Leaf Widgets ─────────────────────────────────────────────────────
+
 
 class Label(Node):
     """Static text label."""
@@ -227,7 +239,11 @@ class Entry(Node):
         return core.Entry(type=self._type)
 
     def bind_props(self, widget):
-        widget.read_only = self._read_only if not isinstance(self._read_only, (State, Computed)) else self._read_only.value
+        widget.read_only = (
+            self._read_only
+            if not isinstance(self._read_only, (State, Computed))
+            else self._read_only.value
+        )
         if isinstance(self._read_only, (State, Computed)):
             unsub = self._read_only.subscribe(
                 lambda: core.queue_main(
@@ -238,8 +254,14 @@ class Entry(Node):
         if self._text_state is not None:
             widget.text = self._text_state.value
             if isinstance(self._text_state, State):
-                make_two_way(self, widget, "text", self._text_state, "on_changed",
-                             user_cb=self._on_changed)
+                make_two_way(
+                    self,
+                    widget,
+                    "text",
+                    self._text_state,
+                    "on_changed",
+                    user_cb=self._on_changed,
+                )
             else:
                 # Computed — one-way only
                 unsub = self._text_state.subscribe(
@@ -279,8 +301,14 @@ class Checkbox(Node):
     def bind_props(self, widget):
         if isinstance(self._checked, State):
             widget.checked = self._checked.value
-            make_two_way(self, widget, "checked", self._checked, "on_toggled",
-                         user_cb=self._on_toggled)
+            make_two_way(
+                self,
+                widget,
+                "checked",
+                self._checked,
+                "on_toggled",
+                user_cb=self._on_toggled,
+            )
         else:
             widget.checked = self._checked
 
@@ -295,7 +323,8 @@ class Slider(Node):
 
     def __init__(
         self,
-        min: int = 0, max: int = 100,
+        min: int = 0,
+        max: int = 100,
         value: State[int] | int = 0,
         has_tooltip: bool = True,
         on_changed: Callable | None = None,
@@ -314,8 +343,14 @@ class Slider(Node):
         widget.has_tooltip = self._has_tooltip
         if isinstance(self._value, State):
             widget.value = self._value.value
-            make_two_way(self, widget, "value", self._value, "on_changed",
-                         user_cb=self._on_changed)
+            make_two_way(
+                self,
+                widget,
+                "value",
+                self._value,
+                "on_changed",
+                user_cb=self._on_changed,
+            )
         elif isinstance(self._value, Computed):
             widget.value = self._value.value
             unsub = self._value.subscribe(
@@ -338,7 +373,8 @@ class Spinbox(Node):
 
     def __init__(
         self,
-        min: int = 0, max: int = 100,
+        min: int = 0,
+        max: int = 100,
         value: State[int] | int = 0,
         on_changed: Callable | None = None,
     ):
@@ -354,8 +390,14 @@ class Spinbox(Node):
     def bind_props(self, widget):
         if isinstance(self._value, State):
             widget.value = self._value.value
-            make_two_way(self, widget, "value", self._value, "on_changed",
-                         user_cb=self._on_changed)
+            make_two_way(
+                self,
+                widget,
+                "value",
+                self._value,
+                "on_changed",
+                user_cb=self._on_changed,
+            )
         elif isinstance(self._value, Computed):
             widget.value = self._value.value
             unsub = self._value.subscribe(
@@ -419,8 +461,14 @@ class Combobox(Node):
     def bind_props(self, widget):
         if isinstance(self._selected, State):
             widget.selected = self._selected.value
-            make_two_way(self, widget, "selected", self._selected, "on_selected",
-                         user_cb=self._on_selected)
+            make_two_way(
+                self,
+                widget,
+                "selected",
+                self._selected,
+                "on_selected",
+                user_cb=self._on_selected,
+            )
         else:
             widget.selected = self._selected
 
@@ -454,8 +502,14 @@ class RadioButtons(Node):
         if isinstance(self._selected, State):
             if self._selected.value >= 0:
                 widget.selected = self._selected.value
-            make_two_way(self, widget, "selected", self._selected, "on_selected",
-                         user_cb=self._on_selected)
+            make_two_way(
+                self,
+                widget,
+                "selected",
+                self._selected,
+                "on_selected",
+                user_cb=self._on_selected,
+            )
         elif self._selected >= 0:
             widget.selected = self._selected
 
@@ -488,8 +542,9 @@ class EditableCombobox(Node):
     def bind_props(self, widget):
         if isinstance(self._text, State):
             widget.text = self._text.value
-            make_two_way(self, widget, "text", self._text, "on_changed",
-                         user_cb=self._on_changed)
+            make_two_way(
+                self, widget, "text", self._text, "on_changed", user_cb=self._on_changed
+            )
         elif self._text:
             widget.text = self._text
 
@@ -519,7 +574,11 @@ class MultilineEntry(Node):
         return core.MultilineEntry(wrapping=self._wrapping)
 
     def bind_props(self, widget):
-        widget.read_only = self._read_only if not isinstance(self._read_only, (State, Computed)) else self._read_only.value
+        widget.read_only = (
+            self._read_only
+            if not isinstance(self._read_only, (State, Computed))
+            else self._read_only.value
+        )
         if isinstance(self._read_only, (State, Computed)):
             unsub = self._read_only.subscribe(
                 lambda: core.queue_main(
@@ -529,8 +588,9 @@ class MultilineEntry(Node):
             self.unsubs.append(unsub)
         if isinstance(self._text, State):
             widget.text = self._text.value
-            make_two_way(self, widget, "text", self._text, "on_changed",
-                         user_cb=self._on_changed)
+            make_two_way(
+                self, widget, "text", self._text, "on_changed", user_cb=self._on_changed
+            )
         elif isinstance(self._text, Computed):
             widget.text = self._text.value
             unsub = self._text.subscribe(
@@ -610,6 +670,7 @@ class Separator(Node):
 
 # ── Drawing ──────────────────────────────────────────────────────────
 
+
 class DrawArea(Node):
     """Custom drawing area. Drawing remains imperative via callback."""
 
@@ -623,13 +684,17 @@ class DrawArea(Node):
 
 # ── DataTable ────────────────────────────────────────────────────────
 
+
 class _ColumnDescriptor:
     """Base class for table column descriptors."""
+
     pass
 
 
 class TextColumn(_ColumnDescriptor):
-    def __init__(self, name: str, key: str, editable: bool = False, color_col: int = -1):
+    def __init__(
+        self, name: str, key: str, editable: bool = False, color_col: int = -1
+    ):
         self.name = name
         self.key = key
         self.editable = editable
@@ -668,7 +733,13 @@ class ProgressColumn(_ColumnDescriptor):
 
 
 class ButtonColumn(_ColumnDescriptor):
-    def __init__(self, name: str, text_key: str, on_click: Callable | None = None, clickable: bool = True):
+    def __init__(
+        self,
+        name: str,
+        text_key: str,
+        on_click: Callable | None = None,
+        clickable: bool = True,
+    ):
         self.name = name
         self.text_key = text_key
         self.on_click = on_click
@@ -682,7 +753,14 @@ class ImageColumn(_ColumnDescriptor):
 
 
 class ImageTextColumn(_ColumnDescriptor):
-    def __init__(self, name: str, image_key: str, text_key: str, editable: bool = False, color_col: int = -1):
+    def __init__(
+        self,
+        name: str,
+        image_key: str,
+        text_key: str,
+        editable: bool = False,
+        color_col: int = -1,
+    ):
         self.name = name
         self.image_key = image_key
         self.text_key = text_key
@@ -717,8 +795,8 @@ class DataTable(Node):
     def create_widget(self, ctx):
         # Build the column mapping: each descriptor maps to 1 or 2 model columns.
         # Model columns are indexed sequentially.
-        model_cols = []       # list of (key, value_type)
-        col_map = []          # per-descriptor: dict with model column indices
+        model_cols = []  # list of (key, value_type)
+        col_map = []  # per-descriptor: dict with model column indices
         button_handlers = {}  # col_index -> on_click handler
 
         for desc in self._columns:
@@ -787,7 +865,11 @@ class DataTable(Node):
                 button_handlers[col](row)
 
         model = core.TableModel(
-            num_columns, column_type, num_rows, cell_value, set_cell_value,
+            num_columns,
+            column_type,
+            num_rows,
+            cell_value,
+            set_cell_value,
         )
         ctx.refs.append(model)
 
@@ -795,30 +877,61 @@ class DataTable(Node):
 
         for desc, info in zip(self._columns, col_map):
             if isinstance(desc, CheckboxTextColumn):
-                cb_edit = core.TableModelColumn.ALWAYS_EDITABLE if desc.checkbox_editable else core.TableModelColumn.NEVER_EDITABLE
-                text_edit = core.TableModelColumn.ALWAYS_EDITABLE if desc.text_editable else core.TableModelColumn.NEVER_EDITABLE
+                cb_edit = (
+                    core.TableModelColumn.ALWAYS_EDITABLE
+                    if desc.checkbox_editable
+                    else core.TableModelColumn.NEVER_EDITABLE
+                )
+                text_edit = (
+                    core.TableModelColumn.ALWAYS_EDITABLE
+                    if desc.text_editable
+                    else core.TableModelColumn.NEVER_EDITABLE
+                )
                 table.append_checkbox_text_column(
-                    desc.name, info["cb_col"], cb_edit,
-                    info["text_col"], text_edit, desc.text_color_col,
+                    desc.name,
+                    info["cb_col"],
+                    cb_edit,
+                    info["text_col"],
+                    text_edit,
+                    desc.text_color_col,
                 )
             elif isinstance(desc, CheckboxColumn):
-                edit = core.TableModelColumn.ALWAYS_EDITABLE if desc.editable else core.TableModelColumn.NEVER_EDITABLE
+                edit = (
+                    core.TableModelColumn.ALWAYS_EDITABLE
+                    if desc.editable
+                    else core.TableModelColumn.NEVER_EDITABLE
+                )
                 table.append_checkbox_column(desc.name, info["col"], edit)
             elif isinstance(desc, TextColumn):
-                edit = core.TableModelColumn.ALWAYS_EDITABLE if desc.editable else core.TableModelColumn.NEVER_EDITABLE
+                edit = (
+                    core.TableModelColumn.ALWAYS_EDITABLE
+                    if desc.editable
+                    else core.TableModelColumn.NEVER_EDITABLE
+                )
                 table.append_text_column(desc.name, info["col"], edit, desc.color_col)
             elif isinstance(desc, ProgressColumn):
                 table.append_progress_bar_column(desc.name, info["col"])
             elif isinstance(desc, ButtonColumn):
-                click = core.TableModelColumn.ALWAYS_EDITABLE if desc.clickable else core.TableModelColumn.NEVER_EDITABLE
+                click = (
+                    core.TableModelColumn.ALWAYS_EDITABLE
+                    if desc.clickable
+                    else core.TableModelColumn.NEVER_EDITABLE
+                )
                 table.append_button_column(desc.name, info["col"], click)
             elif isinstance(desc, ImageColumn):
                 table.append_image_column(desc.name, info["col"])
             elif isinstance(desc, ImageTextColumn):
-                edit = core.TableModelColumn.ALWAYS_EDITABLE if desc.editable else core.TableModelColumn.NEVER_EDITABLE
+                edit = (
+                    core.TableModelColumn.ALWAYS_EDITABLE
+                    if desc.editable
+                    else core.TableModelColumn.NEVER_EDITABLE
+                )
                 table.append_image_text_column(
-                    desc.name, info["img_col"],
-                    info["text_col"], edit, desc.color_col,
+                    desc.name,
+                    info["img_col"],
+                    info["text_col"],
+                    edit,
+                    desc.color_col,
                 )
 
         # Wire ListState notifications to model

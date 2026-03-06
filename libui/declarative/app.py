@@ -7,7 +7,12 @@ from typing import Callable
 
 from libui import core
 import libui.loop as _loop
-from libui.loop import _ensure_sync, _register_window, invoke_on_main, invoke_on_main_async
+from libui.loop import (
+    _ensure_sync,
+    _register_window,
+    invoke_on_main,
+    invoke_on_main_async,
+)
 from libui.declarative.node import BuildContext, Node
 from libui.declarative.state import State
 from libui.loop import quit as ui_quit
@@ -15,8 +20,10 @@ from libui.loop import quit as ui_quit
 
 # ── Menu descriptors ─────────────────────────────────────────────────
 
+
 class _MenuEntry:
     """Base for menu item descriptors."""
+
     pass
 
 
@@ -31,7 +38,12 @@ class MenuItem(_MenuEntry):
 class CheckMenuItem(_MenuEntry):
     """A checkable menu item with optional State binding."""
 
-    def __init__(self, name: str, checked: State[bool] | None = None, on_click: Callable | None = None):
+    def __init__(
+        self,
+        name: str,
+        checked: State[bool] | None = None,
+        on_click: Callable | None = None,
+    ):
         self.name = name
         self.checked = checked
         self.on_click = on_click
@@ -39,21 +51,25 @@ class CheckMenuItem(_MenuEntry):
 
 class MenuSeparator(_MenuEntry):
     """A separator line in a menu."""
+
     pass
 
 
 class QuitItem(_MenuEntry):
     """Platform Quit menu item."""
+
     pass
 
 
 class PreferencesItem(_MenuEntry):
     """Platform Preferences menu item."""
+
     pass
 
 
 class AboutItem(_MenuEntry):
     """Platform About menu item."""
+
     pass
 
 
@@ -66,6 +82,7 @@ class MenuDef:
 
 
 # ── Window ───────────────────────────────────────────────────────────
+
 
 class Window(Node):
     """Top-level window descriptor."""
@@ -90,7 +107,9 @@ class Window(Node):
         self._on_closing = on_closing
 
     def create_widget(self, ctx):
-        w = core.Window(self._title, self._width, self._height, has_menubar=self._has_menubar)
+        w = core.Window(
+            self._title, self._width, self._height, has_menubar=self._has_menubar
+        )
         _register_window(w)
         w.margined = self._margined
         ctx.window = w
@@ -105,13 +124,16 @@ class Window(Node):
         if self._on_closing:
             widget.on_closing(_ensure_sync(self._on_closing, default_return=True))
         else:
+
             def default_on_closing():
                 ui_quit()
                 return True
+
             widget.on_closing(default_on_closing)
 
 
 # ── App ──────────────────────────────────────────────────────────────
+
 
 class App:
     """Application root. Manages menus and a single window."""
@@ -126,8 +148,9 @@ class App:
         self._ctx = BuildContext()
         self._built = False
 
-    def build(self, window: Window | None = None,
-              menus: list[MenuDef] | None = None) -> None:
+    def build(
+        self, window: Window | None = None, menus: list[MenuDef] | None = None
+    ) -> None:
         """Materialise the full widget tree: menus first, then window.
 
         Optional *window* and *menus* args override values set in ``__init__``.
@@ -185,10 +208,13 @@ class App:
                             st.set(it.checked)
                             if cb:
                                 cb()
+
                         return handler
 
                     item.on_clicked(make_handler(state, item, user_cb))
-                    unsub = state.subscribe(lambda it=item, st=state: setattr(it, "checked", st.value))
+                    unsub = state.subscribe(
+                        lambda it=item, st=state: setattr(it, "checked", st.value)
+                    )
                     self._ctx.refs.append(unsub)
                 elif entry.on_click:
                     item.on_clicked(entry.on_click)

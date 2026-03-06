@@ -7,6 +7,7 @@ from tests.conftest import flush_main
 
 # ── State ────────────────────────────────────────────────────────────
 
+
 class TestState:
     def test_initial_value(self):
         s = State(42)
@@ -55,8 +56,10 @@ class TestState:
     def test_unsubscribe_method(self):
         s = State(0)
         calls = []
+
         def cb():
             return calls.append(s.value)
+
         s.subscribe(cb)
         s.value = 1
         s.unsubscribe(cb)
@@ -92,6 +95,7 @@ class TestState:
 
 
 # ── Computed ─────────────────────────────────────────────────────────
+
 
 class TestComputed:
     def test_initial_computation(self):
@@ -132,6 +136,7 @@ class TestComputed:
 
 
 # ── ListState ────────────────────────────────────────────────────────
+
 
 class TestListState:
     def test_initial(self):
@@ -180,6 +185,7 @@ class TestListState:
 
 # ── Node infrastructure (without libui) ─────────────────────────────
 
+
 class TestNodeImports:
     """Verify that all node classes can be imported."""
 
@@ -188,6 +194,7 @@ class TestNodeImports:
 
     def test_stretchy_marks_node(self):
         from libui.declarative import VBox, stretchy
+
         node = VBox()
         assert node.stretchy is False
         result = stretchy(node)
@@ -197,9 +204,11 @@ class TestNodeImports:
 
 # ── Node construction (no build, no libui) ───────────────────────────
 
+
 class TestNodeConstruction:
     def test_vbox_children(self):
         from libui.declarative import VBox, Label
+
         a = Label("a")
         b = Label("b")
         box = VBox(a, b)
@@ -207,22 +216,26 @@ class TestNodeConstruction:
 
     def test_form_rows(self):
         from libui.declarative import Form, Label
+
         f = Form(("Name:", Label("x")), ("Age:", Label("y")))
         assert len(f._rows) == 2
 
     def test_tab_pages(self):
         from libui.declarative import Tab, Label
+
         t = Tab(("Page1", Label("a")), ("Page2", Label("b")))
         assert len(t._pages) == 2
 
     def test_slider_with_state(self):
         from libui.declarative import Slider
+
         v = State(50)
         s = Slider(0, 100, value=v)
         assert s._value is v
 
     def test_label_with_computed(self):
         from libui.declarative import Label
+
         s = State("world")
         c = s.map(lambda x: f"Hello {x}")
         lbl = Label(text=c)
@@ -230,7 +243,9 @@ class TestNodeConstruction:
 
     def test_menu_def(self):
         from libui.declarative import MenuDef, MenuItem, MenuSeparator, QuitItem
-        m = MenuDef("File",
+
+        m = MenuDef(
+            "File",
             MenuItem("Open"),
             MenuSeparator(),
             QuitItem(),
@@ -241,11 +256,13 @@ class TestNodeConstruction:
 
 # ── Integration tests (require libui init) ───────────────────────────
 
+
 class TestDeclarativeWidgets:
     """Tests that actually build widgets using libui core."""
 
     def test_label_builds(self):
         from libui.declarative import Label, BuildContext
+
         ctx = BuildContext()
         lbl = Label("Hello")
         widget = lbl.build(ctx)
@@ -253,6 +270,7 @@ class TestDeclarativeWidgets:
 
     def test_label_with_state(self):
         from libui.declarative import Label, BuildContext
+
         s = State("initial")
         ctx = BuildContext()
         lbl = Label(text=s)
@@ -264,6 +282,7 @@ class TestDeclarativeWidgets:
 
     def test_label_with_computed(self):
         from libui.declarative import Label, BuildContext
+
         s = State("world")
         c = s.map(lambda x: f"Hello {x}")
         ctx = BuildContext()
@@ -276,6 +295,7 @@ class TestDeclarativeWidgets:
 
     def test_button_builds(self):
         from libui.declarative import Button, BuildContext
+
         clicked = []
         ctx = BuildContext()
         btn = Button("Click", on_clicked=lambda: clicked.append(1))
@@ -284,6 +304,7 @@ class TestDeclarativeWidgets:
 
     def test_vbox_with_children(self):
         from libui.declarative import VBox, Label, BuildContext
+
         ctx = BuildContext()
         box = VBox(Label("a"), Label("b"), padded=True)
         widget = box.build(ctx)
@@ -291,6 +312,7 @@ class TestDeclarativeWidgets:
 
     def test_slider_two_way_sync(self):
         from libui.declarative import Slider, Spinbox, ProgressBar, BuildContext
+
         v = State(25)
         ctx = BuildContext()
 
@@ -315,6 +337,7 @@ class TestDeclarativeWidgets:
 
     def test_entry_with_state(self):
         from libui.declarative import Entry, BuildContext
+
         text = State("hello")
         ctx = BuildContext()
         entry = Entry(text=text)
@@ -326,6 +349,7 @@ class TestDeclarativeWidgets:
 
     def test_checkbox_with_state(self):
         from libui.declarative import Checkbox, BuildContext
+
         checked = State(False)
         ctx = BuildContext()
         cb = Checkbox("Test", checked=checked)
@@ -337,6 +361,7 @@ class TestDeclarativeWidgets:
 
     def test_group_with_child(self):
         from libui.declarative import Group, Label, BuildContext
+
         ctx = BuildContext()
         g = Group("Title", Label("content"), margined=True)
         widget = g.build(ctx)
@@ -345,6 +370,7 @@ class TestDeclarativeWidgets:
 
     def test_form_with_rows(self):
         from libui.declarative import Form, Label, BuildContext
+
         ctx = BuildContext()
         f = Form(("Name:", Label("x")), ("Age:", Label("y")), padded=True)
         widget = f.build(ctx)
@@ -352,6 +378,7 @@ class TestDeclarativeWidgets:
 
     def test_tab_with_pages(self):
         from libui.declarative import Tab, Label, BuildContext
+
         ctx = BuildContext()
         t = Tab(("P1", Label("a")), ("P2", Label("b")))
         widget = t.build(ctx)
@@ -359,6 +386,7 @@ class TestDeclarativeWidgets:
 
     def test_separator_builds(self):
         from libui.declarative import Separator, BuildContext
+
         ctx = BuildContext()
         s = Separator()
         widget = s.build(ctx)
@@ -366,6 +394,7 @@ class TestDeclarativeWidgets:
 
     def test_combobox_with_items(self):
         from libui.declarative import Combobox, BuildContext
+
         ctx = BuildContext()
         cb = Combobox(items=["A", "B", "C"], selected=1)
         widget = cb.build(ctx)
@@ -373,6 +402,7 @@ class TestDeclarativeWidgets:
 
     def test_radio_with_items(self):
         from libui.declarative import RadioButtons, BuildContext
+
         ctx = BuildContext()
         rb = RadioButtons(items=["X", "Y", "Z"], selected=0)
         widget = rb.build(ctx)
@@ -380,6 +410,7 @@ class TestDeclarativeWidgets:
 
     def test_multiline_entry(self):
         from libui.declarative import MultilineEntry, BuildContext
+
         ctx = BuildContext()
         mle = MultilineEntry(text="hello\nworld", wrapping=True)
         widget = mle.build(ctx)
@@ -387,6 +418,7 @@ class TestDeclarativeWidgets:
 
     def test_stretchy_in_box(self):
         from libui.declarative import VBox, Label, BuildContext, stretchy
+
         ctx = BuildContext()
         lbl = stretchy(Label("big"))
         box = VBox(lbl)
@@ -395,6 +427,7 @@ class TestDeclarativeWidgets:
 
     def test_grid_builds(self):
         from libui.declarative import Grid, GridCell, Label, BuildContext
+
         ctx = BuildContext()
         g = Grid(
             GridCell(Label("a"), 0, 0),
@@ -406,6 +439,7 @@ class TestDeclarativeWidgets:
 
     def test_window_builds(self):
         from libui.declarative import Window, Label, BuildContext
+
         ctx = BuildContext()
         w = Window("Test", 400, 300, child=Label("content"))
         widget = w.build(ctx)
@@ -414,6 +448,7 @@ class TestDeclarativeWidgets:
 
     def test_progressbar_one_way(self):
         from libui.declarative import ProgressBar, BuildContext
+
         v = State(30)
         ctx = BuildContext()
         pb = ProgressBar(value=v)
@@ -426,6 +461,7 @@ class TestDeclarativeWidgets:
 
 # ── Callbacks receive values ─────────────────────────────────────────
 
+
 class TestCallbackValues:
     """Test that widget callbacks are wired to pass current values.
 
@@ -437,6 +473,7 @@ class TestCallbackValues:
     def test_entry_callback_wraps_value(self):
         """Entry without State: attach_callbacks wraps on_changed to pass text."""
         from libui.declarative import Entry, BuildContext
+
         received = []
         ctx = BuildContext()
         entry = Entry(on_changed=lambda text: received.append(text))
@@ -450,6 +487,7 @@ class TestCallbackValues:
         via the widget side (simulated by setting state directly through
         make_two_way's mechanism)."""
         from libui.declarative import Entry, BuildContext
+
         text_state = State("")
         received = []
         ctx = BuildContext()
@@ -461,6 +499,7 @@ class TestCallbackValues:
 
     def test_checkbox_callback_wraps_value(self):
         from libui.declarative import Checkbox, BuildContext
+
         received = []
         ctx = BuildContext()
         cb = Checkbox("Test", on_toggled=lambda checked: received.append(checked))
@@ -469,6 +508,7 @@ class TestCallbackValues:
 
     def test_slider_callback_wraps_value(self):
         from libui.declarative import Slider, BuildContext
+
         ctx = BuildContext()
         s = Slider(0, 100, on_changed=lambda val: val)
         s.build(ctx)
@@ -476,6 +516,7 @@ class TestCallbackValues:
 
     def test_combobox_callback_wraps_value(self):
         from libui.declarative import Combobox, BuildContext
+
         ctx = BuildContext()
         cb = Combobox(items=["A", "B"], on_selected=lambda idx: idx)
         cb.build(ctx)
@@ -483,6 +524,7 @@ class TestCallbackValues:
 
     def test_radio_callback_wraps_value(self):
         from libui.declarative import RadioButtons, BuildContext
+
         ctx = BuildContext()
         rb = RadioButtons(items=["X", "Y"], on_selected=lambda idx: idx)
         rb.build(ctx)
@@ -490,6 +532,7 @@ class TestCallbackValues:
 
     def test_editable_combobox_callback_wraps_value(self):
         from libui.declarative import EditableCombobox, BuildContext
+
         ctx = BuildContext()
         ecb = EditableCombobox(items=["A"], on_changed=lambda text: text)
         ecb.build(ctx)
@@ -497,6 +540,7 @@ class TestCallbackValues:
 
     def test_multiline_callback_wraps_value(self):
         from libui.declarative import MultilineEntry, BuildContext
+
         ctx = BuildContext()
         mle = MultilineEntry(on_changed=lambda text: text)
         mle.build(ctx)
@@ -504,6 +548,7 @@ class TestCallbackValues:
 
     def test_color_button_callback_wraps_value(self):
         from libui.declarative import ColorButton, BuildContext
+
         ctx = BuildContext()
         btn = ColorButton(on_changed=lambda color: color)
         btn.build(ctx)
@@ -511,6 +556,7 @@ class TestCallbackValues:
 
     def test_font_button_callback_wraps_value(self):
         from libui.declarative import FontButton, BuildContext
+
         ctx = BuildContext()
         btn = FontButton(on_changed=lambda font: font)
         btn.build(ctx)
@@ -518,6 +564,7 @@ class TestCallbackValues:
 
     def test_datetime_callback_wraps_value(self):
         from libui.declarative import DateTimePicker, BuildContext
+
         ctx = BuildContext()
         dtp = DateTimePicker(on_changed=lambda time: time)
         dtp.build(ctx)
@@ -525,6 +572,7 @@ class TestCallbackValues:
 
     def test_spinbox_callback_wraps_value(self):
         from libui.declarative import Spinbox, BuildContext
+
         ctx = BuildContext()
         s = Spinbox(0, 100, on_changed=lambda val: val)
         s.build(ctx)
@@ -533,12 +581,14 @@ class TestCallbackValues:
     def test_make_two_way_user_cb(self):
         """Test that make_two_way calls user_cb with the value."""
         from libui.declarative.node import make_two_way, Node
+
         received = []
 
         class FakeWidget:
             def __init__(self):
                 self.value = 0
                 self._cb = None
+
             def on_changed(self, cb):
                 self._cb = cb
 
@@ -546,9 +596,15 @@ class TestCallbackValues:
         node.unsubs = []
         s = State(0)
         w = FakeWidget()
-        make_two_way(node, w, "value", s, "on_changed",
-                     user_cb=lambda val: received.append(val),
-                     _wrap_cb=False)
+        make_two_way(
+            node,
+            w,
+            "value",
+            s,
+            "on_changed",
+            user_cb=lambda val: received.append(val),
+            _wrap_cb=False,
+        )
         # Simulate the widget firing the event
         w.value = 42
         w._cb()
@@ -558,11 +614,13 @@ class TestCallbackValues:
 
 # ── Bindable read_only ───────────────────────────────────────────────
 
+
 class TestBindableReadOnly:
     """Test that read_only accepts State and auto-binds."""
 
     def test_entry_read_only_state(self):
         from libui.declarative import Entry, BuildContext
+
         ro = State(False)
         ctx = BuildContext()
         entry = Entry(read_only=ro)
@@ -577,6 +635,7 @@ class TestBindableReadOnly:
 
     def test_entry_read_only_bool(self):
         from libui.declarative import Entry, BuildContext
+
         ctx = BuildContext()
         entry = Entry(read_only=True)
         widget = entry.build(ctx)
@@ -584,6 +643,7 @@ class TestBindableReadOnly:
 
     def test_multiline_read_only_state(self):
         from libui.declarative import MultilineEntry, BuildContext
+
         ro = State(False)
         ctx = BuildContext()
         mle = MultilineEntry(read_only=ro)
@@ -595,6 +655,7 @@ class TestBindableReadOnly:
 
     def test_multiline_read_only_bool(self):
         from libui.declarative import MultilineEntry, BuildContext
+
         ctx = BuildContext()
         mle = MultilineEntry(read_only=True)
         widget = mle.build(ctx)
@@ -603,6 +664,7 @@ class TestBindableReadOnly:
     def test_shared_read_only_state(self):
         """Multiple entries sharing one read_only State all update together."""
         from libui.declarative import Entry, BuildContext
+
         ro = State(False)
         ctx = BuildContext()
         e1 = Entry(read_only=ro)
@@ -623,17 +685,20 @@ class TestBindableReadOnly:
 
 # ── App deferred build ───────────────────────────────────────────────
 
+
 class TestAppDeferredBuild:
     """Test App.build(window=..., menus=...) deferred pattern."""
 
     def test_app_no_args(self):
         from libui.declarative import App
+
         app = App()
         assert app._window is None
         assert app._menus == []
 
     def test_app_build_with_args(self):
         from libui.declarative import App, Window, Label
+
         app = App()
         app.build(window=Window("Test", 400, 300, child=Label("hi")))
         assert app._built is True
@@ -643,6 +708,7 @@ class TestAppDeferredBuild:
 
     def test_app_build_overrides_init(self):
         from libui.declarative import App, Window, Label
+
         app = App(window=Window("Old", 100, 100, child=Label("old")))
         app.build(window=Window("New", 200, 200, child=Label("new")))
         assert app.window.title == "New"
@@ -650,6 +716,7 @@ class TestAppDeferredBuild:
 
     def test_app_backward_compat(self):
         from libui.declarative import App, Window, Label
+
         app = App(window=Window("Compat", 400, 300, child=Label("hi")))
         app.build()
         assert app.window.title == "Compat"
@@ -657,6 +724,7 @@ class TestAppDeferredBuild:
 
     def test_app_build_requires_window(self):
         from libui.declarative import App
+
         app = App()
         with pytest.raises(ValueError, match="requires a window"):
             app.build()
@@ -664,31 +732,37 @@ class TestAppDeferredBuild:
 
 # ── App dialog helpers ───────────────────────────────────────────────
 
+
 class TestAppDialogHelpers:
     """Test that App dialog helper methods exist and don't crash without a window."""
 
     def test_msg_box_no_window(self):
         from libui.declarative import App
+
         app = App()
         # Should not raise — just no-op when no window
         app.msg_box("title", "desc")
 
     def test_msg_box_error_no_window(self):
         from libui.declarative import App
+
         app = App()
         app.msg_box_error("title", "desc")
 
     def test_open_file_no_window(self):
         from libui.declarative import App
+
         app = App()
         assert app.open_file() is None
 
     def test_open_folder_no_window(self):
         from libui.declarative import App
+
         app = App()
         assert app.open_folder() is None
 
     def test_save_file_no_window(self):
         from libui.declarative import App
+
         app = App()
         assert app.save_file() is None

@@ -9,6 +9,7 @@ from libui import core
 
 # ── Image ────────────────────────────────────────────────────────────
 
+
 def test_image_creation():
     img = core.Image(16, 16)
     assert img is not None
@@ -22,6 +23,7 @@ def test_image_append():
 
 
 # ── OpenTypeFeatures ─────────────────────────────────────────────────
+
 
 def test_otf_creation():
     otf = core.OpenTypeFeatures()
@@ -57,6 +59,7 @@ def test_otf_items():
 
 
 # ── Attribute factory functions ──────────────────────────────────────
+
 
 def test_family_attribute():
     a = core.family_attribute("Arial")
@@ -124,6 +127,7 @@ def test_features_attribute():
 
 # ── AttributedString ─────────────────────────────────────────────────
 
+
 def test_attributed_string_creation():
     s = core.AttributedString("hello")
     assert s.string == "hello"
@@ -159,9 +163,11 @@ def test_attributed_string_for_each():
     a = core.color_attribute(1.0, 0.0, 0.0, 1.0)
     s.set_attribute(a, 0, 5)
     attrs = []
+
     def cb(attr, start, end):
         attrs.append((attr.type, start, end))
         return False
+
     s.for_each_attribute(cb)
     assert len(attrs) > 0
 
@@ -175,6 +181,7 @@ def test_attributed_string_graphemes():
 
 
 # ── DrawPath ─────────────────────────────────────────────────────────
+
 
 def test_draw_path_creation():
     p = core.DrawPath()
@@ -212,6 +219,7 @@ def test_draw_path_bezier():
 
 # ── DrawBrush ────────────────────────────────────────────────────────
 
+
 def test_draw_brush_creation():
     b = core.DrawBrush()
     assert b.type == core.BrushType.SOLID
@@ -235,13 +243,16 @@ def test_draw_brush_gradient():
     b.y0 = 0.0
     b.x1 = 100.0
     b.y1 = 100.0
-    b.set_stops([
-        (0.0, 1.0, 0.0, 0.0, 1.0),
-        (1.0, 0.0, 0.0, 1.0, 1.0),
-    ])
+    b.set_stops(
+        [
+            (0.0, 1.0, 0.0, 0.0, 1.0),
+            (1.0, 0.0, 0.0, 1.0, 1.0),
+        ]
+    )
 
 
 # ── DrawStrokeParams ────────────────────────────────────────────────
+
 
 def test_draw_stroke_params():
     sp = core.DrawStrokeParams()
@@ -258,6 +269,7 @@ def test_draw_stroke_params_dashes():
 
 
 # ── DrawMatrix ───────────────────────────────────────────────────────
+
 
 def test_draw_matrix_identity():
     m = core.DrawMatrix()
@@ -318,9 +330,11 @@ def test_draw_matrix_invert():
 
 # ── Area ─────────────────────────────────────────────────────────────
 
+
 def test_area_creation():
     def on_draw(ctx, aw, ah, cx, cy, cw, ch):
         pass
+
     a = core.Area(on_draw)
     assert a is not None
     a.destroy()
@@ -329,12 +343,14 @@ def test_area_creation():
 def test_scrolling_area_creation():
     def on_draw(ctx, aw, ah, cx, cy, cw, ch):
         pass
+
     a = core.ScrollingArea(on_draw, 800, 600)
     assert a is not None
     a.destroy()
 
 
 # ── TableModel + Table ───────────────────────────────────────────────
+
 
 def test_table_model_creation():
     data = [
@@ -376,6 +392,7 @@ def test_table_creation():
 
 
 # ── Enum class behavior ─────────────────────────────────────────────
+
 
 def test_enum_classes_exist():
     assert issubclass(core.BrushType, enum.IntEnum)

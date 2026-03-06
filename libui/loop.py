@@ -140,7 +140,9 @@ def run(coro) -> None:
                 core.queue_main(core.quit)
 
     thread = threading.Thread(
-        target=asyncio.run, args=(_asyncio_main(),), daemon=True,
+        target=asyncio.run,
+        args=(_asyncio_main(),),
+        daemon=True,
     )
     thread.start()
     startup_event.wait()

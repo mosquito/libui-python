@@ -42,8 +42,9 @@ def set_cell_value(row, col, value):
 async def main():
     w = core.Window("Table Example", 500, 300, False)
 
-    model = core.TableModel(num_columns, column_type, num_rows,
-                              cell_value, set_cell_value)
+    model = core.TableModel(
+        num_columns, column_type, num_rows, cell_value, set_cell_value
+    )
 
     table = core.Table(model)
     table.append_text_column("Name", 0)

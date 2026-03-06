@@ -71,8 +71,15 @@ class Node:
         """Override to add children to the widget."""
 
 
-def make_two_way(node: Node, widget, prop: str, state: State, event: str,
-                  user_cb=None, _wrap_cb: bool = True) -> None:
+def make_two_way(
+    node: Node,
+    widget,
+    prop: str,
+    state: State,
+    event: str,
+    user_cb=None,
+    _wrap_cb: bool = True,
+) -> None:
     """Set up two-way binding between a State and a widget property.
 
     State -> widget: subscribe to state changes and set widget prop.
@@ -82,6 +89,7 @@ def make_two_way(node: Node, widget, prop: str, state: State, event: str,
     If *user_cb* is provided it is called with the current value after
     the State has been updated.
     """
+
     # State → widget (subscriber may fire from asyncio thread)
     def on_state_change():
         val = state.value
