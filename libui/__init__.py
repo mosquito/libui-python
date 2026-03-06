@@ -10,12 +10,12 @@ from libui.loop import (
     run,
 )
 
-# ── Re-exports that need no wrapping ──────────────────────────────────
+# -- Re-exports that need no wrapping ----------------------------------
 
 from libui.core import (
     # Base
     Control,
-    # Menu
+    # Menu (not uiControl — direct re-export, guarded by ENSURE_MAIN_THREAD)
     Menu,
     MenuItem,
     # Complex widgets (not proxied)
@@ -68,7 +68,7 @@ from libui.core import (
 )
 
 
-# ── Proxy infrastructure ─────────────────────────────────────────────
+# -- Proxy infrastructure ---------------------------------------------
 
 
 class _CachedProperty:
@@ -111,11 +111,16 @@ class _Proxy:
         raise NotImplementedError
 
     def _sync_cache(self):
-        for p in self._cached_props:
-            try:
-                self._cache[p] = getattr(self._core, p)
-            except Exception:
-                pass
+        """Populate cache from the core widget. Must run on main thread."""
+        def _read():
+            for p in self._cached_props:
+                try:
+                    self._cache[p] = getattr(self._core, p)
+                except Exception:
+                    pass
+        # _sync_cache is called right after invoke_on_main(_create_core),
+        # so we're on the asyncio thread — dispatch to main.
+        invoke_on_main(_read)
 
     def show(self):
         core.queue_main(self._core.show)
@@ -133,7 +138,7 @@ class _Proxy:
         core.queue_main(self._core.destroy)
 
 
-# ── Widget proxies ───────────────────────────────────────────────────
+# -- Widget proxies ---------------------------------------------------
 
 
 class Label(_Proxy):
@@ -301,7 +306,7 @@ class FontButton(_Proxy):
 
     @property
     def font(self):
-        return self._core.font
+        return invoke_on_main(lambda: self._core.font)
 
     def on_changed(self, cb):
         cb = _ensure_sync(cb)
@@ -423,10 +428,10 @@ class Tab(_Proxy):
         core.queue_main(lambda: self._core.set_margined(index, margined))
 
     def margined(self, index):
-        return self._core.margined(index)
+        return invoke_on_main(self._core.margined, index)
 
     def num_pages(self):
-        return self._core.num_pages()
+        return invoke_on_main(self._core.num_pages)
 
     def on_selected(self, cb):
         cb = _ensure_sync(cb)
@@ -487,19 +492,19 @@ class Table(_Proxy):
         core.queue_main(lambda: self._core.append_image_text_column(*args, **kwargs))
 
     def column_width(self, col):
-        return self._core.column_width(col)
+        return invoke_on_main(self._core.column_width, col)
 
     def set_column_width(self, col, width):
         core.queue_main(lambda: self._core.set_column_width(col, width))
 
     def header_sort_indicator(self, col):
-        return self._core.header_sort_indicator(col)
+        return invoke_on_main(self._core.header_sort_indicator, col)
 
     def header_set_sort_indicator(self, col, indicator):
         core.queue_main(lambda: self._core.header_set_sort_indicator(col, indicator))
 
 
-# ── Container proxies ────────────────────────────────────────────────
+# -- Container proxies ------------------------------------------------
 
 
 class Box(_Proxy):
@@ -593,7 +598,7 @@ class Grid(_Proxy):
         core.queue_main(lambda: self._core.insert_at(*args, **kwargs))
 
 
-# ── Window proxy ─────────────────────────────────────────────────────
+# -- Window proxy -----------------------------------------------------
 
 
 class Window(_Proxy):
@@ -621,7 +626,7 @@ class Window(_Proxy):
         core.queue_main(lambda: self._core.on_closing(cb))
 
 
-# ── Async dialog wrappers ────────────────────────────────────────────
+# -- Async dialog wrappers --------------------------------------------
 
 
 async def open_file(window):

@@ -13,12 +13,12 @@ from libui.loop import (
     invoke_on_main,
     invoke_on_main_async,
 )
-from libui.declarative.node import BuildContext, Node
-from libui.declarative.state import State
+from libui.node import BuildContext, Node
+from libui.state import State
 from libui.loop import quit as ui_quit
 
 
-# ── Menu descriptors ─────────────────────────────────────────────────
+# -- Menu descriptors -------------------------------------------------
 
 
 class _MenuEntry:
@@ -81,7 +81,7 @@ class MenuDef:
         self.items = items
 
 
-# ── Window ───────────────────────────────────────────────────────────
+# -- Window -----------------------------------------------------------
 
 
 class Window(Node):
@@ -132,7 +132,7 @@ class Window(Node):
             widget.on_closing(default_on_closing)
 
 
-# ── App ──────────────────────────────────────────────────────────────
+# -- App --------------------------------------------------------------
 
 
 class App:
@@ -235,14 +235,18 @@ class App:
     def show(self) -> None:
         """Show the window."""
         if self._window and self._window.widget:
-            self._window.widget.show()
+            w = self._window.widget
+            if _loop._asyncio_loop is not None:
+                invoke_on_main(w.show)
+            else:
+                w.show()
 
     @property
     def window(self):
         """The underlying core Window widget (available after build)."""
         return self._window.widget if self._window else None
 
-    # ── Sync dialog helpers (for main-thread callers) ────────────────
+    # -- Sync dialog helpers (for main-thread callers) ----------------
 
     def msg_box(self, title: str, description: str) -> None:
         """Show an informational message box."""
@@ -277,7 +281,7 @@ class App:
             return core.save_file(w)
         return None
 
-    # ── Async dialog helpers (for asyncio-thread callers) ────────────
+    # -- Async dialog helpers (for asyncio-thread callers) ------------
 
     async def open_file_async(self) -> str | None:
         w = self.window

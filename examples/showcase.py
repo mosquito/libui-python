@@ -1,844 +1,881 @@
-"""Comprehensive showcase of every widget in python-libui-ng.
+"""Comprehensive widget showcase.
 
-Demonstrates all ~30 widget types, drawing primitives, tables, menus, and
-dialogs — organised into six tabbed panels with interactive connections
-between controls.
+Demonstrates all widget types using the declarative UI layer —
+reactive State, auto-syncing, and composable nodes.
 
 Usage:
     python examples/showcase.py
 """
 
-import asyncio
 import math
 
 import libui
+from libui.declarative import (
+    AboutItem,
+    App,
+    Button,
+    ButtonColumn,
+    Checkbox,
+    CheckMenuItem,
+    ColorButton,
+    Combobox,
+    DataTable,
+    DateTimePicker,
+    DrawArea,
+    ScrollingDrawArea,
+    EditableCombobox,
+    Entry,
+    FontButton,
+    Form,
+    Grid,
+    GridCell,
+    Group,
+    HBox,
+    Label,
+    ListState,
+    MenuDef,
+    MenuItem,
+    MenuSeparator,
+    MultilineEntry,
+    PreferencesItem,
+    ProgressBar,
+    ProgressColumn,
+    QuitItem,
+    RadioButtons,
+    Separator,
+    Slider,
+    Spinbox,
+    State,
+    Tab,
+    CheckboxColumn,
+    CheckboxTextColumn,
+    TextColumn,
+    VBox,
+    Window,
+    stretchy,
+)
 
 
-# ── Menus (must be created BEFORE the Window) ───────────────────────
+# -- Reusable components ---------------------------------------------
 
 
-def build_menus(window_ref):
-    """Build application menus. Returns list of refs to keep alive."""
-    refs = []
-
-    # File menu
-    file_menu = libui.Menu("File")
-    refs.append(file_menu)
-
-    item_open = file_menu.append_item("Open File...")
-    item_open.on_clicked(lambda: _do_open_file(window_ref))
-
-    item_folder = file_menu.append_item("Open Folder...")
-    item_folder.on_clicked(lambda: _do_open_folder(window_ref))
-
-    item_save = file_menu.append_item("Save As...")
-    item_save.on_clicked(lambda: _do_save_file(window_ref))
-
-    file_menu.append_separator()
-    file_menu.append_quit_item()
-
-    # Edit menu
-    edit_menu = libui.Menu("Edit")
-    refs.append(edit_menu)
-
-    edit_menu.append_preferences_item()
-    edit_menu.append_separator()
-
-    toggle_item = edit_menu.append_check_item("Toggle Feature")
-    toggle_item.on_clicked(lambda: _do_toggle(toggle_item, window_ref))
-    refs.append(toggle_item)
-
-    # Help menu
-    help_menu = libui.Menu("Help")
-    refs.append(help_menu)
-
-    help_menu.append_about_item()
-
-    docs_item = help_menu.append_item("Documentation")
-    docs_item.on_clicked(lambda: _do_docs(window_ref))
-
-    return refs
+def StatusPanel(status: State[str]) -> Label:
+    return Label(text=status)
 
 
-def _do_open_file(wref):
-    w = wref[0]
-    if w is None:
-        return
-    path = libui.open_file(w)
-    if path:
-        libui.msg_box(w, "Open File", f"Selected: {path}")
+# -- Tab 0: Basic Controls -------------------------------------------
 
 
-def _do_open_folder(wref):
-    w = wref[0]
-    if w is None:
-        return
-    path = libui.open_folder(w)
-    if path:
-        libui.msg_box(w, "Open Folder", f"Selected: {path}")
-
-
-def _do_save_file(wref):
-    w = wref[0]
-    if w is None:
-        return
-    path = libui.save_file(w)
-    if path:
-        libui.msg_box(w, "Save File", f"Will save to: {path}")
-
-
-def _do_toggle(item, wref):
-    w = wref[0]
-    if w is None:
-        return
-    state = "ON" if item.checked else "OFF"
-    libui.msg_box(w, "Toggle Feature", f"Feature is now {state}")
-
-
-def _do_docs(wref):
-    w = wref[0]
-    if w is None:
-        return
-    libui.msg_box(
-        w, "Documentation", "Visit the python-libui-ng repository for full docs."
-    )
-
-
-# ── Tab 0: Basic Controls ───────────────────────────────────────────
-
-
-def build_basic_tab(window):
-    vbox = libui.VerticalBox(padded=True)
-
-    status = libui.Label("Interact with the controls below.")
-    vbox.append(status)
-
-    # Text Entry group
-    entry_group = libui.Group("Text Entry")
-    entry_group.margined = True
-    vbox.append(entry_group)
-
-    form = libui.Form(padded=True)
-    entry_group.set_child(form)
-
-    entry_normal = libui.Entry()
-    entry_password = libui.Entry(type="password")
-    entry_search = libui.Entry(type="search")
-    entries = [entry_normal, entry_password, entry_search]
-
-    entry_normal.on_changed(
-        lambda: _update_status(status, f"Normal entry: {entry_normal.text}")
-    )
-    entry_password.on_changed(
-        lambda: _update_status(
-            status, f"Password entry changed (len={len(entry_password.text)})"
-        )
-    )
-    entry_search.on_changed(
-        lambda: _update_status(status, f"Search entry: {entry_search.text}")
-    )
-
-    form.append("Normal:", entry_normal)
-    form.append("Password:", entry_password)
-    form.append("Search:", entry_search)
-
-    vbox.append(libui.Separator())
-
-    # Buttons & Checkboxes group
-    btn_group = libui.Group("Buttons & Checkboxes")
-    btn_group.margined = True
-    vbox.append(btn_group)
-
-    hbox = libui.HorizontalBox(padded=True)
-    btn_group.set_child(hbox)
-
-    left_col = libui.VerticalBox(padded=True)
-    right_col = libui.VerticalBox(padded=True)
-    hbox.append(left_col, stretchy=True)
-    hbox.append(right_col, stretchy=True)
-
-    # Left column: buttons and feature checkboxes
-    click_count = [0]
-    btn_click = libui.Button("Click Me")
+def build_basic_tab(app: App):
+    status = State("Interact with the controls below.")
+    click_count = State(0)
+    read_only = State(False)
 
     def on_click():
-        click_count[0] += 1
-        status.text = f"Button clicked {click_count[0]} time(s)"
+        click_count.update(lambda x: x + 1)
+        status.set(f"Button clicked {click_count.value} time(s)")
 
-    btn_click.on_clicked(on_click)
-    left_col.append(btn_click)
-
-    btn_reset = libui.Button("Reset")
-    btn_reset.on_clicked(
-        lambda: _update_status(status, "Interact with the controls below.")
+    return VBox(
+        StatusPanel(status),
+        Group(
+            "Text Entry",
+            Form(
+                (
+                    "Normal:",
+                    Entry(
+                        read_only=read_only,
+                        on_changed=lambda text: status.set(f"Normal entry: {text}"),
+                    ),
+                ),
+                (
+                    "Password:",
+                    Entry(
+                        type="password",
+                        read_only=read_only,
+                        on_changed=lambda text: status.set(
+                            f"Password entry changed (len={len(text)})"
+                        ),
+                    ),
+                ),
+                (
+                    "Search:",
+                    Entry(
+                        type="search",
+                        read_only=read_only,
+                        on_changed=lambda text: status.set(f"Search entry: {text}"),
+                    ),
+                ),
+            ),
+        ),
+        Separator(),
+        Group(
+            "Buttons & Checkboxes",
+            HBox(
+                stretchy(
+                    VBox(
+                        Button("Click Me", on_clicked=on_click),
+                        Button(
+                            "Reset",
+                            on_clicked=lambda: status.set(
+                                "Interact with the controls below."
+                            ),
+                        ),
+                        Checkbox(
+                            "Enable feature",
+                            on_toggled=lambda checked: status.set(
+                                f"Feature {'enabled' if checked else 'disabled'}"
+                            ),
+                        ),
+                        Checkbox(
+                            "Read-only entries",
+                            on_toggled=lambda checked: (
+                                read_only.set(checked),
+                                status.set(
+                                    f"Entries are {'read-only' if checked else 'editable'}"
+                                ),
+                            ),
+                        ),
+                    )
+                ),
+                stretchy(
+                    VBox(
+                        Checkbox(
+                            "Borderless window",
+                            on_toggled=lambda checked: (
+                                setattr(app.window, "borderless", checked)
+                                if app.window
+                                else None
+                            ),
+                        ),
+                        Checkbox(
+                            "Fullscreen",
+                            on_toggled=lambda checked: (
+                                setattr(app.window, "fullscreen", checked)
+                                if app.window
+                                else None
+                            ),
+                        ),
+                    )
+                ),
+            ),
+        ),
     )
-    left_col.append(btn_reset)
-
-    cb_feature = libui.Checkbox("Enable feature")
-    cb_feature.on_toggled(
-        lambda: _update_status(
-            status, f"Feature {'enabled' if cb_feature.checked else 'disabled'}"
-        )
-    )
-    left_col.append(cb_feature)
-
-    cb_readonly = libui.Checkbox("Read-only entries")
-
-    def toggle_readonly():
-        ro = cb_readonly.checked
-        for e in entries:
-            e.read_only = ro
-        status.text = f"Entries are {'read-only' if ro else 'editable'}"
-
-    cb_readonly.on_toggled(toggle_readonly)
-    left_col.append(cb_readonly)
-
-    # Right column: window toggles
-    cb_borderless = libui.Checkbox("Borderless window")
-    cb_borderless.on_toggled(
-        lambda: setattr(window, "borderless", cb_borderless.checked)
-    )
-    right_col.append(cb_borderless)
-
-    cb_fullscreen = libui.Checkbox("Fullscreen")
-    cb_fullscreen.on_toggled(
-        lambda: setattr(window, "fullscreen", cb_fullscreen.checked)
-    )
-    right_col.append(cb_fullscreen)
-
-    return vbox
 
 
-def _update_status(label, text):
-    label.text = text
-
-
-# ── Tab 1: Selectors & Numbers ──────────────────────────────────────
+# -- Tab 1: Selectors & Numbers --------------------------------------
 
 
 def build_selectors_tab():
-    vbox = libui.VerticalBox(padded=True)
+    status = State("Adjust the controls below.")
+    value = State(0)
+    value.subscribe(lambda: status.set(f"Value: {value.value}"))
 
-    status = libui.Label("Adjust the controls below.")
-    vbox.append(status)
-
-    # Numeric Controls group
-    num_group = libui.Group("Numeric Controls")
-    num_group.margined = True
-    vbox.append(num_group)
-
-    form = libui.Form(padded=True)
-    num_group.set_child(form)
-
-    slider = libui.Slider(0, 100)
-    slider.has_tooltip = True
-    spinbox = libui.Spinbox(0, 100)
-    progress = libui.ProgressBar()
-
-    syncing = [False]
-
-    def on_slider_changed():
-        if syncing[0]:
-            return
-        syncing[0] = True
-        v = slider.value
-        spinbox.value = v
-        progress.value = v
-        status.text = f"Value: {v}"
-        syncing[0] = False
-
-    def on_spinbox_changed():
-        if syncing[0]:
-            return
-        syncing[0] = True
-        v = spinbox.value
-        slider.value = v
-        progress.value = v
-        status.text = f"Value: {v}"
-        syncing[0] = False
-
-    slider.on_changed(on_slider_changed)
-    spinbox.on_changed(on_spinbox_changed)
-
-    form.append("Slider:", slider)
-    form.append("Spinbox:", spinbox)
-    form.append("Progress:", progress)
-
-    vbox.append(libui.Separator())
-
-    # Selection Controls group
-    sel_group = libui.Group("Selection Controls")
-    sel_group.margined = True
-    vbox.append(sel_group)
-
-    sel_form = libui.Form(padded=True)
-    sel_group.set_child(sel_form)
-
-    radio = libui.RadioButtons()
-    for label in ("Low", "Medium", "High", "Ultra"):
-        radio.append(label)
     radio_labels = ["Low", "Medium", "High", "Ultra"]
-    radio.on_selected(
-        lambda: _update_status(status, f"Radio: {radio_labels[radio.selected]}")
-    )
-
-    combo = libui.Combobox()
     combo_items = ["Red", "Green", "Blue", "Yellow"]
-    for item in combo_items:
-        combo.append(item)
-    combo.selected = 0
-    combo.on_selected(
-        lambda: _update_status(status, f"Combobox: {combo_items[combo.selected]}")
+
+    return VBox(
+        StatusPanel(status),
+        Group(
+            "Numeric Controls",
+            Form(
+                ("Slider:", Slider(0, 100, value=value)),
+                ("Spinbox:", Spinbox(0, 100, value=value)),
+                ("Progress:", ProgressBar(value=value)),
+            ),
+        ),
+        Separator(),
+        Group(
+            "Selection Controls",
+            Form(
+                (
+                    "Quality:",
+                    RadioButtons(
+                        items=radio_labels,
+                        on_selected=lambda idx: status.set(
+                            f"Radio: {radio_labels[idx]}" if idx >= 0 else "Radio: none"
+                        ),
+                    ),
+                ),
+                (
+                    "Color:",
+                    Combobox(
+                        items=combo_items,
+                        selected=0,
+                        on_selected=lambda idx: status.set(
+                            f"Combobox: {combo_items[idx]}"
+                        ),
+                    ),
+                ),
+                (
+                    "Fruit:",
+                    EditableCombobox(
+                        items=["Apple", "Banana", "Cherry"],
+                        on_changed=lambda text: status.set(f"EditableCombobox: {text}"),
+                    ),
+                ),
+            ),
+        ),
     )
 
-    ecb = libui.EditableCombobox()
-    for item in ("Apple", "Banana", "Cherry"):
-        ecb.append(item)
-    ecb.on_changed(lambda: _update_status(status, f"EditableCombobox: {ecb.text}"))
 
-    sel_form.append("Quality:", radio)
-    sel_form.append("Color:", combo)
-    sel_form.append("Fruit:", ecb)
-
-    return vbox
-
-
-# ── Tab 2: Rich Input ───────────────────────────────────────────────
+# -- Tab 2: Rich Input -----------------------------------------------
 
 
 def build_rich_input_tab():
-    hbox = libui.HorizontalBox(padded=True)
+    pick_status = State("Pick a value to see it here.")
+    append_count = State(0)
+    mle_read_only = State(False)
 
-    # Left: Multiline Entry
-    ml_group = libui.Group("Multiline Entry")
-    ml_group.margined = True
-    hbox.append(ml_group, stretchy=True)
-
-    ml_vbox = libui.VerticalBox(padded=True)
-    ml_group.set_child(ml_vbox)
-
-    mle = libui.MultilineEntry(wrapping=True)
-    mle.text = "Type or paste text here.\nMultiple lines supported."
-    ml_vbox.append(mle, stretchy=True)
-
-    ml_btn_box = libui.HorizontalBox(padded=True)
-    ml_vbox.append(ml_btn_box)
-
-    append_count = [0]
-    btn_append = libui.Button("Append Text")
+    mle = MultilineEntry(
+        text="Type or paste text here.\nMultiple lines supported.",
+        wrapping=True,
+        read_only=mle_read_only,
+    )
 
     def do_append():
-        append_count[0] += 1
-        mle.append(f"\nAppended line #{append_count[0]}")
+        append_count.update(lambda x: x + 1)
+        if mle.widget:
+            mle.widget.append(f"\nAppended line #{append_count.value}")
 
-    btn_append.on_clicked(do_append)
-    ml_btn_box.append(btn_append)
+    def do_clear():
+        if mle.widget:
+            mle.widget.text = ""
 
-    btn_clear = libui.Button("Clear")
-    btn_clear.on_clicked(lambda: setattr(mle, "text", ""))
-    ml_btn_box.append(btn_clear)
-
-    cb_ml_ro = libui.Checkbox("Read Only")
-    cb_ml_ro.on_toggled(lambda: setattr(mle, "read_only", cb_ml_ro.checked))
-    ml_btn_box.append(cb_ml_ro)
-
-    # Right: Pickers
-    pick_group = libui.Group("Pickers")
-    pick_group.margined = True
-    hbox.append(pick_group, stretchy=True)
-
-    pick_vbox = libui.VerticalBox(padded=True)
-    pick_group.set_child(pick_vbox)
-
-    pick_form = libui.Form(padded=True)
-    pick_vbox.append(pick_form, stretchy=True)
-
-    pick_status = libui.Label("Pick a value to see it here.")
-    pick_vbox.append(pick_status)
-
-    color_btn = libui.ColorButton()
-    color_btn.on_changed(
-        lambda: _update_status(
-            pick_status,
-            "Color: R={:.2f} G={:.2f} B={:.2f} A={:.2f}".format(*color_btn.color),
-        )
+    return HBox(
+        stretchy(
+            Group(
+                "Multiline Entry",
+                VBox(
+                    stretchy(mle),
+                    HBox(
+                        Button("Append Text", on_clicked=do_append),
+                        Button("Clear", on_clicked=do_clear),
+                        Checkbox(
+                            "Read Only",
+                            on_toggled=lambda checked: mle_read_only.set(checked),
+                        ),
+                    ),
+                ),
+            )
+        ),
+        stretchy(
+            Group(
+                "Pickers",
+                VBox(
+                    stretchy(
+                        Form(
+                            (
+                                "Color:",
+                                ColorButton(
+                                    on_changed=lambda color: pick_status.set(
+                                        "Color: R={:.2f} G={:.2f} B={:.2f} A={:.2f}".format(
+                                            *color
+                                        )
+                                    ),
+                                ),
+                            ),
+                            (
+                                "Font:",
+                                FontButton(
+                                    on_changed=lambda font: pick_status.set(
+                                        "Font: {family} {size}pt".format(**font)
+                                    ),
+                                ),
+                            ),
+                            (
+                                "Date & Time:",
+                                DateTimePicker(
+                                    on_changed=lambda time: pick_status.set(
+                                        "DateTime: {0:04d}-{1:02d}-{2:02d} {3:02d}:{4:02d}:{5:02d}".format(
+                                            *time[:6]
+                                        )
+                                    ),
+                                ),
+                            ),
+                            (
+                                "Date:",
+                                DateTimePicker(
+                                    type="date",
+                                    on_changed=lambda time: pick_status.set(
+                                        "Date: {0:04d}-{1:02d}-{2:02d}".format(
+                                            *time[:3]
+                                        )
+                                    ),
+                                ),
+                            ),
+                            (
+                                "Time:",
+                                DateTimePicker(
+                                    type="time",
+                                    on_changed=lambda time: pick_status.set(
+                                        "Time: {3:02d}:{4:02d}:{5:02d}".format(
+                                            *time[:6]
+                                        )
+                                    ),
+                                ),
+                            ),
+                        )
+                    ),
+                    Label(text=pick_status),
+                ),
+            )
+        ),
     )
 
-    font_btn = libui.FontButton()
-    font_btn.on_changed(
-        lambda: _update_status(
-            pick_status, "Font: {family} {size}pt".format(**font_btn.font)
-        )
-    )
 
-    dtp_full = libui.DateTimePicker()
-    dtp_full.on_changed(
-        lambda: _update_status(
-            pick_status,
-            "DateTime: {0:04d}-{1:02d}-{2:02d} {3:02d}:{4:02d}:{5:02d}".format(
-                *dtp_full.time[:6]
-            ),
-        )
-    )
-
-    dtp_date = libui.DateTimePicker(type="date")
-    dtp_date.on_changed(
-        lambda: _update_status(
-            pick_status, "Date: {0:04d}-{1:02d}-{2:02d}".format(*dtp_date.time[:3])
-        )
-    )
-
-    dtp_time = libui.DateTimePicker(type="time")
-    dtp_time.on_changed(
-        lambda: _update_status(
-            pick_status, "Time: {3:02d}:{4:02d}:{5:02d}".format(*dtp_time.time[:6])
-        )
-    )
-
-    pick_form.append("Color:", color_btn)
-    pick_form.append("Font:", font_btn)
-    pick_form.append("Date & Time:", dtp_full)
-    pick_form.append("Date:", dtp_date)
-    pick_form.append("Time:", dtp_time)
-
-    return hbox
-
-
-# ── Tab 3: Layout ───────────────────────────────────────────────────
+# -- Tab 3: Layout ---------------------------------------------------
 
 
 def build_layout_tab():
-    vbox = libui.VerticalBox(padded=True)
-
-    # Grid Layout group
-    grid_group = libui.Group("Grid Layout")
-    grid_group.margined = True
-    vbox.append(grid_group)
-
-    grid = libui.Grid(padded=True)
-    grid_group.set_child(grid)
-
-    lbl_name = libui.Label("Name:")
-    entry_name = libui.Entry()
-    grid.append(lbl_name, 0, 0, 1, 1, False, libui.Align.END, False, libui.Align.FILL)
-    grid.append(entry_name, 1, 0, 1, 1, True, libui.Align.FILL, False, libui.Align.FILL)
-
-    lbl_email = libui.Label("Email:")
-    entry_email = libui.Entry()
-    grid.append(lbl_email, 0, 1, 1, 1, False, libui.Align.END, False, libui.Align.FILL)
-    grid.append(
-        entry_email, 1, 1, 1, 1, True, libui.Align.FILL, False, libui.Align.FILL
+    return VBox(
+        Group(
+            "Grid Layout",
+            Grid(
+                GridCell(Label("Name:"), 0, 0, halign=libui.Align.END),
+                GridCell(Entry(), 1, 0, hexpand=True),
+                GridCell(Label("Email:"), 0, 1, halign=libui.Align.END),
+                GridCell(Entry(), 1, 1, hexpand=True),
+                GridCell(Button("Submit"), 0, 2, xspan=2, halign=libui.Align.CENTER),
+                padded=True,
+            ),
+        ),
+        Separator(),
+        Group(
+            "Form Layout",
+            Form(
+                ("Username:", Entry()),
+                ("Password:", Entry(type="password")),
+                ("Role:", Combobox(items=["Admin", "Editor", "Viewer"], selected=0)),
+                ("Bio:", MultilineEntry(wrapping=True), True),
+            ),
+        ),
+        Separator(),
+        Group(
+            "Nested Boxes",
+            HBox(
+                *[
+                    stretchy(
+                        VBox(
+                            Label(f"Column {c}"),
+                            Button(f"Btn {c}"),
+                            ProgressBar(),
+                        )
+                    )
+                    for c in ("A", "B", "C")
+                ]
+            ),
+        ),
     )
 
-    btn_submit = libui.Button("Submit")
-    grid.append(
-        btn_submit, 0, 2, 2, 1, False, libui.Align.CENTER, False, libui.Align.FILL
-    )
 
-    vbox.append(libui.Separator())
-
-    # Form Layout group
-    form_group = libui.Group("Form Layout")
-    form_group.margined = True
-    vbox.append(form_group)
-
-    form = libui.Form(padded=True)
-    form_group.set_child(form)
-
-    form.append("Username:", libui.Entry())
-    form.append("Password:", libui.Entry(type="password"))
-
-    role_combo = libui.Combobox()
-    for r in ("Admin", "Editor", "Viewer"):
-        role_combo.append(r)
-    role_combo.selected = 0
-    form.append("Role:", role_combo)
-
-    form.append("Bio:", libui.MultilineEntry(wrapping=True), stretchy=True)
-
-    vbox.append(libui.Separator())
-
-    # Nested Boxes group
-    nest_group = libui.Group("Nested Boxes")
-    nest_group.margined = True
-    vbox.append(nest_group)
-
-    outer_hbox = libui.HorizontalBox(padded=True)
-    nest_group.set_child(outer_hbox)
-
-    for col_label in ("Column A", "Column B", "Column C"):
-        col_vbox = libui.VerticalBox(padded=True)
-        col_vbox.append(libui.Label(col_label))
-        col_vbox.append(libui.Button(f"Btn {col_label[-1]}"))
-        col_vbox.append(libui.ProgressBar())
-        outer_hbox.append(col_vbox, stretchy=True)
-
-    return vbox
+# -- Tab 4: Drawing --------------------------------------------------
 
 
-# ── Tab 4: Drawing ──────────────────────────────────────────────────
+def _draw_label(ctx, text, x, y, size=10.0):
+    """Draw a text label with a background pill for readability on any theme."""
+    astr = libui.AttributedString(text)
+    astr.set_attribute(libui.color_attribute(0.0, 0.0, 0.0, 1.0), 0, len(text))
+    font = {"family": "sans-serif", "size": size}
+    layout = libui.DrawTextLayout(astr, font, 800)
+    w, h = layout.extents()
+    pad = 3.0
+    bg = libui.DrawPath()
+    bg.add_rectangle(x - pad, y - pad, w + pad * 2, h + pad * 2)
+    bg.end()
+    br = libui.DrawBrush()
+    br.r, br.g, br.b, br.a = 1.0, 1.0, 1.0, 0.8
+    ctx.fill(bg, br)
+    ctx.text(layout, x, y)
 
 
-def build_drawing_tab():
-    vbox = libui.VerticalBox(padded=True)
-    area = libui.Area(_on_draw)
-    vbox.append(area, stretchy=True)
-    return vbox
+class Shape:
+    """A draggable shape with a bounding box."""
+
+    def __init__(self, x, y, w, h, draw_fn):
+        self.x, self.y, self.w, self.h = x, y, w, h
+        self._draw = draw_fn
+
+    def hit(self, mx, my):
+        return self.x <= mx <= self.x + self.w and self.y <= my <= self.y + self.h
+
+    def draw(self, ctx):
+        self._draw(ctx, self.x, self.y)
 
 
-def _on_draw(ctx, area_w, area_h, clip_x, clip_y, clip_w, clip_h):
-    _draw_filled_shapes(ctx)
-    _draw_gradients(ctx)
-    _draw_stroke_styles(ctx)
-    _draw_attributed_text(ctx, area_w)
-    _draw_rotated_rect(ctx)
+def _make_shapes():
+    """Create the list of draggable shapes."""
+    shapes = []
 
-
-def _draw_filled_shapes(ctx):
     # Red rectangle
-    p = libui.DrawPath()
-    p.add_rectangle(20, 20, 120, 70)
-    p.end()
-    b = libui.DrawBrush()
-    b.r, b.g, b.b, b.a = 0.85, 0.15, 0.15, 1.0
-    ctx.fill(p, b)
+    def draw_rect(ctx, x, y):
+        p = libui.DrawPath()
+        p.add_rectangle(x, y, 120, 70)
+        p.end()
+        b = libui.DrawBrush()
+        b.r, b.g, b.b, b.a = 0.85, 0.15, 0.15, 1.0
+        ctx.fill(p, b)
+
+    shapes.append(Shape(20, 20, 120, 70, draw_rect))
 
     # Green circle
-    p2 = libui.DrawPath()
-    p2.new_figure_with_arc(230, 55, 35, 0, 2 * math.pi, False)
-    p2.end()
-    b2 = libui.DrawBrush()
-    b2.r, b2.g, b2.b, b2.a = 0.15, 0.7, 0.15, 1.0
-    ctx.fill(p2, b2)
+    def draw_circle(ctx, x, y):
+        p = libui.DrawPath()
+        p.new_figure_with_arc(x + 35, y + 35, 35, 0, 2 * math.pi, False)
+        p.end()
+        b = libui.DrawBrush()
+        b.r, b.g, b.b, b.a = 0.15, 0.7, 0.15, 1.0
+        ctx.fill(p, b)
+
+    shapes.append(Shape(195, 20, 70, 70, draw_circle))
 
     # Blue triangle
-    p3 = libui.DrawPath()
-    p3.new_figure(310, 90)
-    p3.line_to(350, 20)
-    p3.line_to(390, 90)
-    p3.close_figure()
-    p3.end()
-    b3 = libui.DrawBrush()
-    b3.r, b3.g, b3.b, b3.a = 0.15, 0.15, 0.85, 1.0
-    ctx.fill(p3, b3)
+    def draw_triangle(ctx, x, y):
+        p = libui.DrawPath()
+        p.new_figure(x, y + 70)
+        p.line_to(x + 40, y)
+        p.line_to(x + 80, y + 70)
+        p.close_figure()
+        p.end()
+        b = libui.DrawBrush()
+        b.r, b.g, b.b, b.a = 0.15, 0.15, 0.85, 1.0
+        ctx.fill(p, b)
 
-
-def _draw_gradients(ctx):
-    ox, oy = 430, 10
+    shapes.append(Shape(310, 20, 80, 70, draw_triangle))
 
     # Linear gradient rectangle
-    p = libui.DrawPath()
-    p.add_rectangle(ox, oy, 150, 70)
-    p.end()
-
-    lb = libui.DrawBrush()
-    lb.type = libui.BrushType.LINEAR_GRADIENT
-    lb.x0, lb.y0 = ox, oy
-    lb.x1, lb.y1 = ox + 150, oy + 70
-    lb.set_stops(
-        [
+    def draw_lin_grad(ctx, x, y):
+        p = libui.DrawPath()
+        p.add_rectangle(x, y, 150, 70)
+        p.end()
+        lb = libui.DrawBrush()
+        lb.type = libui.BrushType.LINEAR_GRADIENT
+        lb.x0, lb.y0 = x, y
+        lb.x1, lb.y1 = x + 150, y + 70
+        lb.set_stops([
             (0.0, 1.0, 0.0, 0.0, 1.0),
             (0.5, 1.0, 1.0, 0.0, 1.0),
             (1.0, 0.0, 0.0, 1.0, 1.0),
-        ]
-    )
-    ctx.fill(p, lb)
+        ])
+        ctx.fill(p, lb)
+
+    shapes.append(Shape(430, 10, 150, 70, draw_lin_grad))
 
     # Radial gradient circle
-    cx, cy, r = ox + 75, oy + 130, 40
-    p2 = libui.DrawPath()
-    p2.new_figure_with_arc(cx, cy, r, 0, 2 * math.pi, False)
-    p2.end()
-
-    rb = libui.DrawBrush()
-    rb.type = libui.BrushType.RADIAL_GRADIENT
-    rb.x0, rb.y0 = cx, cy
-    rb.x1, rb.y1 = cx, cy
-    rb.outer_radius = r
-    rb.set_stops(
-        [
+    def draw_rad_grad(ctx, x, y):
+        r = 40
+        cx, cy = x + r, y + r
+        p = libui.DrawPath()
+        p.new_figure_with_arc(cx, cy, r, 0, 2 * math.pi, False)
+        p.end()
+        rb = libui.DrawBrush()
+        rb.type = libui.BrushType.RADIAL_GRADIENT
+        rb.x0, rb.y0 = cx, cy
+        rb.x1, rb.y1 = cx, cy
+        rb.outer_radius = r
+        rb.set_stops([
             (0.0, 1.0, 1.0, 1.0, 1.0),
             (1.0, 0.2, 0.0, 0.6, 1.0),
-        ]
-    )
-    ctx.fill(p2, rb)
+        ])
+        ctx.fill(p, rb)
 
+    shapes.append(Shape(465, 100, 80, 80, draw_rad_grad))
 
-def _draw_stroke_styles(ctx):
-    y_base = 120
-
-    black = libui.DrawBrush()
-    black.r, black.g, black.b, black.a = 0.0, 0.0, 0.0, 1.0
-
-    # Line cap styles: FLAT, ROUND, SQUARE
-    caps = [libui.LineCap.FLAT, libui.LineCap.ROUND, libui.LineCap.SQUARE]
-    cap_names = ["Flat", "Round", "Square"]
-    for i, (cap, name) in enumerate(zip(caps, cap_names)):
-        y = y_base + i * 25
+    # Stroke styles block
+    def draw_strokes(ctx, x, y):
+        black = libui.DrawBrush()
+        black.r, black.g, black.b, black.a = 0.0, 0.0, 0.0, 1.0
+        caps = [libui.LineCap.FLAT, libui.LineCap.ROUND, libui.LineCap.SQUARE]
+        cap_names = ["Flat", "Round", "Square"]
+        for i, (cap, name) in enumerate(zip(caps, cap_names)):
+            ly = y + i * 25
+            p = libui.DrawPath()
+            p.new_figure(x, ly)
+            p.line_to(x + 130, ly)
+            p.end()
+            sp = libui.DrawStrokeParams()
+            sp.thickness = 6.0
+            sp.cap = cap
+            ctx.stroke(p, black, sp)
+            _draw_label(ctx, name, x + 135, ly - 6)
+        # Dashed line
+        ly = y + 80
         p = libui.DrawPath()
-        p.new_figure(20, y)
-        p.line_to(150, y)
+        p.new_figure(x, ly)
+        p.line_to(x + 180, ly)
         p.end()
         sp = libui.DrawStrokeParams()
-        sp.thickness = 6.0
-        sp.cap = cap
+        sp.thickness = 3.0
+        sp.set_dashes([10.0, 5.0, 3.0, 5.0])
         ctx.stroke(p, black, sp)
+        _draw_label(ctx, "Dashed", x + 185, ly - 6)
 
-        # label
-        astr = libui.AttributedString(name)
-        font = {"family": "sans-serif", "size": 10.0}
-        layout = libui.DrawTextLayout(astr, font, 200)
-        ctx.text(layout, 155, y - 6)
+    shapes.append(Shape(20, 120, 240, 100, draw_strokes))
 
-    # Line join styles: MITER, ROUND, BEVEL
-    joins = [libui.LineJoin.MITER, libui.LineJoin.ROUND, libui.LineJoin.BEVEL]
-    join_names = ["Miter", "Round", "Bevel"]
-    for i, (join, name) in enumerate(zip(joins, join_names)):
-        x_off = 230 + i * 70
-        y = y_base
-        p = libui.DrawPath()
-        p.new_figure(x_off, y + 50)
-        p.line_to(x_off + 20, y)
-        p.line_to(x_off + 40, y + 50)
-        p.end()
-        sp = libui.DrawStrokeParams()
-        sp.thickness = 5.0
-        sp.join = join
-        ctx.stroke(p, black, sp)
+    # Join styles block
+    def draw_joins(ctx, x, y):
+        black = libui.DrawBrush()
+        black.r, black.g, black.b, black.a = 0.0, 0.0, 0.0, 1.0
+        joins = [libui.LineJoin.MITER, libui.LineJoin.ROUND, libui.LineJoin.BEVEL]
+        join_names = ["Miter", "Round", "Bevel"]
+        for i, (join, name) in enumerate(zip(joins, join_names)):
+            xo = x + i * 70
+            p = libui.DrawPath()
+            p.new_figure(xo, y + 50)
+            p.line_to(xo + 20, y)
+            p.line_to(xo + 40, y + 50)
+            p.end()
+            sp = libui.DrawStrokeParams()
+            sp.thickness = 5.0
+            sp.join = join
+            ctx.stroke(p, black, sp)
+            _draw_label(ctx, name, xo + 5, y + 55)
 
-        astr = libui.AttributedString(name)
-        font = {"family": "sans-serif", "size": 10.0}
-        layout = libui.DrawTextLayout(astr, font, 200)
-        ctx.text(layout, x_off + 5, y + 55)
-
-    # Dashed line
-    y_dash = y_base + 85
-    p = libui.DrawPath()
-    p.new_figure(20, y_dash)
-    p.line_to(200, y_dash)
-    p.end()
-    sp = libui.DrawStrokeParams()
-    sp.thickness = 3.0
-    sp.set_dashes([10.0, 5.0, 3.0, 5.0])
-    ctx.stroke(p, black, sp)
-
-    astr = libui.AttributedString("Dashed")
-    font = {"family": "sans-serif", "size": 10.0}
-    layout = libui.DrawTextLayout(astr, font, 200)
-    ctx.text(layout, 210, y_dash - 6)
+    shapes.append(Shape(280, 120, 210, 75, draw_joins))
 
     # Bezier curve
-    y_bez = y_dash + 25
-    p = libui.DrawPath()
-    p.new_figure(20, y_bez + 30)
-    p.bezier_to(80, y_bez - 30, 160, y_bez + 60, 250, y_bez)
-    p.end()
-    sp = libui.DrawStrokeParams()
-    sp.thickness = 2.5
-    sp.cap = libui.LineCap.ROUND
+    def draw_bezier(ctx, x, y):
+        p = libui.DrawPath()
+        p.new_figure(x, y + 30)
+        p.bezier_to(x + 60, y - 30, x + 140, y + 60, x + 230, y)
+        p.end()
+        sp = libui.DrawStrokeParams()
+        sp.thickness = 2.5
+        sp.cap = libui.LineCap.ROUND
+        purple = libui.DrawBrush()
+        purple.r, purple.g, purple.b, purple.a = 0.5, 0.0, 0.7, 1.0
+        ctx.stroke(p, purple, sp)
+        _draw_label(ctx, "Bezier", x + 235, y - 6)
 
-    purple = libui.DrawBrush()
-    purple.r, purple.g, purple.b, purple.a = 0.5, 0.0, 0.7, 1.0
-    ctx.stroke(p, purple, sp)
+    shapes.append(Shape(20, 230, 280, 60, draw_bezier))
 
-    astr = libui.AttributedString("Bezier")
-    font = {"family": "sans-serif", "size": 10.0}
-    layout = libui.DrawTextLayout(astr, font, 200)
-    ctx.text(layout, 255, y_bez - 6)
+    # Attributed text
+    def draw_attr_text(ctx, x, y):
+        text = "Bold Colored Italic Underlined Highlight Family Size"
+        astr = libui.AttributedString(text)
+        # Base: black text on white pill for theme safety
+        astr.set_attribute(libui.color_attribute(0.0, 0.0, 0.0, 1.0), 0, len(text))
+        astr.set_attribute(libui.weight_attribute(libui.TextWeight.BOLD), 0, 4)
+        astr.set_attribute(libui.color_attribute(0.8, 0.0, 0.0, 1.0), 5, 12)
+        astr.set_attribute(libui.italic_attribute(libui.TextItalic.ITALIC), 13, 19)
+        astr.set_attribute(libui.underline_attribute(libui.Underline.SINGLE), 20, 30)
+        astr.set_attribute(libui.background_attribute(1.0, 1.0, 0.0, 0.5), 31, 40)
+        astr.set_attribute(libui.family_attribute("serif"), 41, 47)
+        astr.set_attribute(libui.size_attribute(22.0), 48, 52)
+        font = {"family": "sans-serif", "size": 14.0}
+        layout = libui.DrawTextLayout(astr, font, 600)
+        # Background pill
+        w, h = layout.extents()
+        pad = 3.0
+        bg = libui.DrawPath()
+        bg.add_rectangle(x - pad, y - pad, w + pad * 2, h + pad * 2)
+        bg.end()
+        br = libui.DrawBrush()
+        br.r, br.g, br.b, br.a = 1.0, 1.0, 1.0, 0.8
+        ctx.fill(bg, br)
+        ctx.text(layout, x, y)
 
+    shapes.append(Shape(20, 300, 600, 30, draw_attr_text))
 
-def _draw_attributed_text(ctx, area_w):
-    y = 290
+    # Rotated rectangle
+    def draw_rotated(ctx, x, y):
+        cx, cy = x + 30, y + 30
+        m = libui.DrawMatrix()
+        m.set_identity()
+        m.rotate(cx, cy, 30)
+        ctx.save()
+        ctx.transform(m)
+        p = libui.DrawPath()
+        p.add_rectangle(cx - 30, cy - 15, 60, 30)
+        p.end()
+        b = libui.DrawBrush()
+        b.r, b.g, b.b, b.a = 0.0, 0.6, 0.6, 0.7
+        ctx.fill(p, b)
+        ctx.restore()
 
-    text = "Bold Colored Italic Underlined Highlight Family Size"
-    astr = libui.AttributedString(text)
+    shapes.append(Shape(330, 300, 60, 60, draw_rotated))
 
-    # Bold: "Bold" (0..4)
-    astr.set_attribute(libui.weight_attribute(libui.TextWeight.BOLD), 0, 4)
-
-    # Colored: "Colored" (5..12)
-    astr.set_attribute(libui.color_attribute(0.8, 0.0, 0.0, 1.0), 5, 12)
-
-    # Italic: "Italic" (13..19)
-    astr.set_attribute(libui.italic_attribute(libui.TextItalic.ITALIC), 13, 19)
-
-    # Underlined: "Underlined" (20..30)
-    astr.set_attribute(libui.underline_attribute(libui.Underline.SINGLE), 20, 30)
-
-    # Background highlight: "Highlight" (31..40)
-    astr.set_attribute(libui.background_attribute(1.0, 1.0, 0.0, 0.5), 31, 40)
-
-    # Custom family: "Family" (41..47)
-    astr.set_attribute(libui.family_attribute("serif"), 41, 47)
-
-    # Custom size: "Size" (48..52)
-    astr.set_attribute(libui.size_attribute(22.0), 48, 52)
-
-    font = {"family": "sans-serif", "size": 14.0}
-    width = min(area_w - 40, 600.0)
-    layout = libui.DrawTextLayout(astr, font, width)
-    ctx.text(layout, 20, y)
-
-
-def _draw_rotated_rect(ctx):
-    cx, cy = 360, 330
-    m = libui.DrawMatrix()
-    m.set_identity()
-    m.rotate(cx, cy, 30)
-
-    ctx.save()
-    ctx.transform(m)
-
-    p = libui.DrawPath()
-    p.add_rectangle(cx - 30, cy - 15, 60, 30)
-    p.end()
-
-    b = libui.DrawBrush()
-    b.r, b.g, b.b, b.a = 0.0, 0.6, 0.6, 0.7
-
-    ctx.fill(p, b)
-    ctx.restore()
+    return shapes
 
 
-# ── Tab 5: Data Table ───────────────────────────────────────────────
+def _draw_hint(ctx, area_w, area_h):
+    """Draw a hint label at the bottom."""
+    _draw_label(ctx, "Drag shapes to rearrange them", 20, area_h - 20, size=11.0)
 
 
-def build_table_tab(window):
-    vbox = libui.VerticalBox(padded=True)
+def build_drawing_tab():
+    shapes = _make_shapes()
+    drag = {"active": None, "ox": 0.0, "oy": 0.0}
+    area_node = None  # set after build
 
-    status = libui.Label("Table events appear here.")
-    vbox.append(status)
+    def on_draw(ctx, area_w, area_h, clip_x, clip_y, clip_w, clip_h):
+        for s in shapes:
+            s.draw(ctx)
+        _draw_hint(ctx, area_w, area_h)
 
-    # Table data: [checked, name, role, progress, button_text]
-    data = [
-        [1, "Alice Johnson", "Engineer", 85, "Details"],
-        [0, "Bob Smith", "Designer", 72, "Details"],
-        [1, "Carol White", "Manager", 90, "Details"],
-        [0, "Dave Brown", "Intern", 45, "Details"],
-        [1, "Eve Davis", "Engineer", 95, "Details"],
-        [0, "Frank Miller", "Analyst", 68, "Details"],
-        [1, "Grace Lee", "Lead", 88, "Details"],
-        [0, "Hank Wilson", "QA", 77, "Details"],
-    ]
+    def on_mouse(event):
+        if event["down"] == 1:
+            # Hit test in reverse order (topmost first)
+            for s in reversed(shapes):
+                if s.hit(event["x"], event["y"]):
+                    drag["active"] = s
+                    drag["ox"] = event["x"] - s.x
+                    drag["oy"] = event["y"] - s.y
+                    # Move to top
+                    shapes.remove(s)
+                    shapes.append(s)
+                    break
+        elif event["up"] == 1:
+            drag["active"] = None
+        elif drag["active"] is not None:
+            s = drag["active"]
+            # Clamp to area bounds
+            aw, ah = event["area_width"], event["area_height"]
+            nx = max(0, min(event["x"] - drag["ox"], aw - s.w))
+            ny = max(0, min(event["y"] - drag["oy"], ah - s.h))
+            s.x, s.y = nx, ny
+            if area_node and area_node.widget:
+                area_node.widget.queue_redraw_all()
 
-    def num_columns():
-        return 5
+    def on_mouse_left(left):
+        if left:
+            drag["active"] = None
 
-    def column_type(col):
-        if col in (0, 3):
-            return libui.TableValueType.INT
-        return libui.TableValueType.STRING
-
-    def num_rows():
-        return len(data)
-
-    def cell_value(row, col):
-        v = data[row][col]
-        return int(v) if col in (0, 3) else str(v)
-
-    def set_cell_value(row, col, value):
-        data[row][col] = value
-        if col == 0:
-            name = data[row][1]
-            state = "checked" if value else "unchecked"
-            status.text = f"{name}: {state}"
-        elif col == 4:
-            name = data[row][1]
-            role = data[row][2]
-            libui.msg_box(window, "Details", f"{name} — {role}\nScore: {data[row][3]}")
-
-    model = libui.TableModel(
-        num_columns, column_type, num_rows, cell_value, set_cell_value
+    area_node = DrawArea(
+        on_draw=on_draw,
+        on_mouse_event=on_mouse,
+        on_mouse_crossed=on_mouse_left,
     )
 
-    table = libui.Table(model)
-    table.append_checkbox_text_column(
-        "Employee", 0, libui.TableModelColumn.ALWAYS_EDITABLE, 1
-    )
-    table.append_text_column("Role", 2)
-    table.append_progress_bar_column("Score", 3)
-    table.append_button_column("Action", 4, libui.TableModelColumn.ALWAYS_EDITABLE)
+    # -- Scrolling sub-tab: freehand drawing canvas --
 
-    table.on_row_clicked(
-        lambda row: _update_status(status, f"Clicked row {row}: {data[row][1]}")
-    )
-    table.on_row_double_clicked(
-        lambda row: _update_status(status, f"Double-clicked row {row}: {data[row][1]}")
-    )
-    table.on_header_clicked(
-        lambda col: _update_status(status, f"Header clicked: column {col}")
-    )
-    table.on_selection_changed(
-        lambda: _update_status(status, f"Selection: {table.selection}")
+    strokes = []  # list of lists of (x, y) points
+    current_stroke = {"pts": None}
+    scroll_node = None
+
+    def on_scroll_draw(ctx, area_w, area_h, clip_x, clip_y, clip_w, clip_h):
+        # Grid background
+        gray = libui.DrawBrush()
+        gray.r, gray.g, gray.b, gray.a = 0.0, 0.0, 0.0, 0.08
+        sp = libui.DrawStrokeParams()
+        sp.thickness = 1.0
+        for x in range(0, 2001, 50):
+            p = libui.DrawPath()
+            p.new_figure(x, 0)
+            p.line_to(x, 2000)
+            p.end()
+            ctx.stroke(p, gray, sp)
+        for y in range(0, 2001, 50):
+            p = libui.DrawPath()
+            p.new_figure(0, y)
+            p.line_to(2000, y)
+            p.end()
+            ctx.stroke(p, gray, sp)
+
+        # Draw all strokes
+        ink = libui.DrawBrush()
+        ink.r, ink.g, ink.b, ink.a = 0.1, 0.1, 0.8, 1.0
+        sp2 = libui.DrawStrokeParams()
+        sp2.thickness = 2.5
+        sp2.cap = libui.LineCap.ROUND
+        sp2.join = libui.LineJoin.ROUND
+        all_strokes = strokes + ([current_stroke["pts"]] if current_stroke["pts"] else [])
+        for pts in all_strokes:
+            if len(pts) < 2:
+                continue
+            p = libui.DrawPath()
+            p.new_figure(pts[0][0], pts[0][1])
+            for px, py in pts[1:]:
+                p.line_to(px, py)
+            p.end()
+            ctx.stroke(p, ink, sp2)
+
+        # Hint
+        _draw_label(ctx, "Draw with mouse \u2014 click and drag to sketch lines", 20, 20, size=14.0)
+
+    def on_scroll_mouse(event):
+        nonlocal scroll_node
+        if event["down"] == 1:
+            current_stroke["pts"] = [(event["x"], event["y"])]
+        elif event["up"] == 1:
+            if current_stroke["pts"] and len(current_stroke["pts"]) >= 2:
+                strokes.append(current_stroke["pts"])
+            current_stroke["pts"] = None
+            if scroll_node and scroll_node.widget:
+                scroll_node.widget.queue_redraw_all()
+        elif current_stroke["pts"] is not None:
+            current_stroke["pts"].append((event["x"], event["y"]))
+            if scroll_node and scroll_node.widget:
+                scroll_node.widget.queue_redraw_all()
+
+    scroll_node = ScrollingDrawArea(
+        on_draw=on_scroll_draw,
+        width=2000,
+        height=2000,
+        on_mouse_event=on_scroll_mouse,
     )
 
-    vbox.append(table, stretchy=True)
+    return Tab(
+        ("DrawArea", VBox(stretchy(area_node))),
+        ("Drawing Canvas", VBox(stretchy(scroll_node))),
+    )
 
-    # Add / Remove buttons
-    btn_box = libui.HorizontalBox(padded=True)
-    vbox.append(btn_box)
 
-    add_counter = [len(data)]
-    btn_add = libui.Button("Add Row")
+# -- Tab 5: Data Table -----------------------------------------------
+
+
+def build_table_tab(app: App):
+    status = State("Table events appear here.")
+
+    data = ListState(
+        [
+            {"checked": 1, "name": "Alice Johnson", "role": "Engineer", "score": 85, "vip": 1, "action": "Details"},
+            {"checked": 0, "name": "Bob Smith", "role": "Designer", "score": 72, "vip": 0, "action": "Details"},
+            {"checked": 1, "name": "Carol White", "role": "Manager", "score": 90, "vip": 1, "action": "Details"},
+            {"checked": 0, "name": "Dave Brown", "role": "Intern", "score": 45, "vip": 0, "action": "Details"},
+            {"checked": 1, "name": "Eve Davis", "role": "Engineer", "score": 95, "vip": 1, "action": "Details"},
+            {"checked": 0, "name": "Frank Miller", "role": "Analyst", "score": 68, "vip": 0, "action": "Details"},
+            {"checked": 1, "name": "Grace Lee", "role": "Lead", "score": 88, "vip": 0, "action": "Details"},
+            {"checked": 0, "name": "Hank Wilson", "role": "QA", "score": 77, "vip": 0, "action": "Details"},
+        ]
+    )
+
+    add_counter = State(len(data))
+
+    def on_button_click(row):
+        if row < len(data):
+            d = data[row]
+            app.msg_box("Details", f"{d['name']} — {d['role']}\nScore: {d['score']}")
+
+    table = DataTable(
+        data,
+        CheckboxTextColumn("Employee", checkbox_key="checked", text_key="name"),
+        TextColumn("Role", key="role"),
+        ProgressColumn("Score", key="score"),
+        CheckboxColumn("VIP", key="vip"),
+        ButtonColumn("Action", text_key="action", on_click=on_button_click),
+        on_row_clicked=lambda row: status.set(
+            f"Clicked row {row}: {data[row]['name']}" if row < len(data) else ""
+        ),
+        on_row_double_clicked=lambda row: status.set(
+            f"Double-clicked row {row}: {data[row]['name']}" if row < len(data) else ""
+        ),
+        on_header_clicked=lambda col: status.set(f"Header clicked: column {col}"),
+        on_selection_changed=lambda: status.set(
+            f"Selection: {table.widget.selection}" if table.widget else ""
+        ),
+    )
 
     def do_add():
-        add_counter[0] += 1
-        new_row = [0, f"New Person {add_counter[0]}", "New", 50, "Details"]
-        data.append(new_row)
-        model.row_inserted(len(data) - 1)
-        status.text = f"Added row {len(data) - 1}"
-
-    btn_add.on_clicked(do_add)
-    btn_box.append(btn_add)
-
-    btn_remove = libui.Button("Remove Last")
+        add_counter.update(lambda x: x + 1)
+        data.append(
+            {
+                "checked": 0,
+                "name": f"New Person {add_counter.value}",
+                "role": "New",
+                "score": 50,
+                "vip": 0,
+                "action": "Details",
+            }
+        )
+        status.set(f"Added row {len(data) - 1}")
 
     def do_remove():
         if len(data) == 0:
             return
-        idx = len(data) - 1
-        name = data[idx][1]
+        name = data[len(data) - 1]["name"]
         data.pop()
-        model.row_deleted(idx)
-        status.text = f"Removed: {name}"
+        status.set(f"Removed: {name}")
 
-    btn_remove.on_clicked(do_remove)
-    btn_box.append(btn_remove)
+    return VBox(
+        StatusPanel(status),
+        stretchy(table),
+        HBox(
+            Button("Add Row", on_clicked=do_add),
+            Button("Remove Last", on_clicked=do_remove),
+        ),
+    )
 
-    return vbox
+
+# -- Menus ------------------------------------------------------------
 
 
-# ── Main ─────────────────────────────────────────────────────────────
+def build_menus(app: App):
+    toggle_state = State(False)
+
+    def do_open():
+        path = app.open_file()
+        if path:
+            app.msg_box("Open File", f"Selected: {path}")
+
+    def do_open_folder():
+        path = app.open_folder()
+        if path:
+            app.msg_box("Open Folder", f"Selected: {path}")
+
+    def do_save():
+        path = app.save_file()
+        if path:
+            app.msg_box("Save File", f"Will save to: {path}")
+
+    def do_toggle():
+        state = "ON" if toggle_state.value else "OFF"
+        app.msg_box("Toggle Feature", f"Feature is now {state}")
+
+    def do_docs():
+        app.msg_box(
+            "Documentation", "Visit the python-libui-ng repository for full docs."
+        )
+
+    return [
+        MenuDef(
+            "File",
+            MenuItem("Open File...", on_click=do_open),
+            MenuItem("Open Folder...", on_click=do_open_folder),
+            MenuItem("Save As...", on_click=do_save),
+            MenuSeparator(),
+            QuitItem(),
+        ),
+        MenuDef(
+            "Edit",
+            PreferencesItem(),
+            MenuSeparator(),
+            CheckMenuItem("Toggle Feature", checked=toggle_state, on_click=do_toggle),
+        ),
+        MenuDef(
+            "Help",
+            AboutItem(),
+            MenuItem("Documentation", on_click=do_docs),
+        ),
+    ]
+
+
+# -- Main -------------------------------------------------------------
 
 
 async def main():
-    window_ref = [None]
-    build_menus(window_ref)
+    app = App()
 
-    window = libui.Window("Python libui-ng Showcase", 900, 700, has_menubar=True)
-    window_ref[0] = window
+    content = Tab(
+        ("Basic Controls", build_basic_tab(app)),
+        ("Selectors & Numbers", build_selectors_tab()),
+        ("Rich Input", build_rich_input_tab()),
+        ("Layout", build_layout_tab()),
+        ("Drawing", build_drawing_tab()),
+        ("Data Table", build_table_tab(app)),
+    )
 
-    tab = libui.Tab()
-    tab.append("Basic Controls", build_basic_tab(window))
-    tab.append("Selectors & Numbers", build_selectors_tab())
-    tab.append("Rich Input", build_rich_input_tab())
-    tab.append("Layout", build_layout_tab())
-    tab.append("Drawing", build_drawing_tab())
-    tab.append("Data Table", build_table_tab(window))
-
-    for i in range(tab.num_pages()):
-        tab.set_margined(i, True)
-
-    window.set_child(tab)
-
-    def on_closing():
-        libui.quit()
-        return True
-
-    window.on_closing(on_closing)
-    window.show()
-
-    await asyncio.Event().wait()
+    app.build(
+        menus=build_menus(app),
+        window=Window(
+            "Python libui-ng Showcase",
+            900,
+            700,
+            child=content,
+            has_menubar=True,
+        ),
+    )
+    app.show()
+    await app.wait()
 
 
 if __name__ == "__main__":

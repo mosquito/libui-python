@@ -18,6 +18,12 @@ _asyncio_loop: asyncio.AbstractEventLoop | None = None
 _live_windows: set = set()
 
 
+def _set_asyncio_loop_ref(loop):
+    """Set the module-level _asyncio_loop from any scope."""
+    global _asyncio_loop
+    _asyncio_loop = loop
+
+
 def _register_window(window) -> None:
     """Track a window so it can be destroyed on shutdown."""
     _live_windows.add(window)
@@ -53,7 +59,7 @@ def _ensure_sync(cb, default_return=None):
     return wrapper
 
 
-# ── Bridge functions ──────────────────────────────────────────────────
+# -- Bridge functions --------------------------------------------------
 
 
 def invoke_on_main(fn, *args, **kwargs):
@@ -61,7 +67,12 @@ def invoke_on_main(fn, *args, **kwargs):
 
     Returns the result of *fn(\\*args, \\*\\*kwargs)*.  If *fn* raises, the
     exception is re-raised in the caller.
+
+    If already on the main thread, runs *fn* directly (avoids deadlock).
     """
+    if core.is_main_thread():
+        return fn(*args, **kwargs)
+
     q = queue.Queue(1)
 
     def _run():
@@ -93,7 +104,7 @@ async def invoke_on_main_async(fn, *args, **kwargs):
     return await fut
 
 
-# ── quit / run ────────────────────────────────────────────────────────
+# -- quit / run --------------------------------------------------------
 
 
 def quit() -> None:
@@ -128,6 +139,7 @@ def run(coro) -> None:
         aloop = asyncio.get_running_loop()
         loop_holder["loop"] = aloop
         task_holder["task"] = asyncio.current_task()
+        _set_asyncio_loop_ref(aloop)  # set before signaling so user coro sees it
         core._set_asyncio_loop(aloop)
         startup_event.set()
         try:
@@ -154,7 +166,11 @@ def run(coro) -> None:
 
     core.on_should_quit(_on_should_quit)
 
-    # Main-thread pump — GIL released inside main_step(wait=True)
+    # Main-thread pump — GIL released inside main_step(wait=True).
+    # The window close trampoline calls fire_should_quit() which directly
+    # invokes _on_should_quit → quit_event.set(), all within the same
+    # main_step() call.  After main_step returns, the loop checks
+    # quit_event and exits.
     while not quit_event.is_set():
         core.main_step(wait=True)
 
@@ -164,10 +180,10 @@ def run(coro) -> None:
         _asyncio_loop.call_soon_threadsafe(task.cancel)
     thread.join(timeout=5.0)
 
-    for w in list(_live_windows):
-        w.destroy()
     _live_windows.clear()
 
     core._set_asyncio_loop(None)
     _asyncio_loop = None
+    # uninit_all_controls() inside core.uninit() destroys any remaining
+    # controls tracked by the C layer, so no manual w.destroy() is needed.
     core.uninit()

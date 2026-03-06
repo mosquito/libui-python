@@ -981,6 +981,83 @@ python examples/draw.py                 # custom drawing
 python examples/table.py               # data table
 ```
 
+## Threading and the Main Thread
+
+### Why this matters
+
+Native GUI toolkits have a fundamental rule: UI operations must happen on the main thread. On macOS (Cocoa) this is strictly enforced by the OS — violating it causes crashes and deadlocks. GTK+ and Win32 have similar constraints. Writing correct cross-platform GUI code means respecting this rule on every platform.
+
+libui-python handles this for you. The library provides native asyncio integration with a completion queue that lets you write ordinary async Python while all UI work is transparently dispatched to the correct thread.
+
+### How it works
+
+`libui.run()` starts a two-thread architecture:
+
+- **Main thread** — owns the native UI event loop and processes a completion queue
+- **Background thread** — runs your `async def main()` coroutine on a standard asyncio event loop
+
+The high-level API (`libui.Window`, `libui.Button`, etc.) automatically dispatches every widget operation through `core.queue_main()` — a completion queue that executes functions on the main thread. You interact with widgets from async code as if threading didn't exist:
+
+```python
+import asyncio
+import libui
+
+async def main():
+    window = libui.Window("Hello", 400, 300)
+    label = libui.Label("Ready")
+    box = libui.VerticalBox(padded=True)
+    box.append(label)
+    window.set_child(box)
+
+    async def update():
+        await asyncio.sleep(1)
+        label.text = "Updated!"  # dispatched to main thread automatically
+
+    asyncio.create_task(update())
+    window.on_closing(lambda: (libui.quit(), True)[-1])
+    window.show()
+    await asyncio.Event().wait()
+
+libui.run(main())
+```
+
+Async callbacks work the same way — `on_clicked`, `on_changed`, and other event handlers accept both sync and async functions. Async handlers are scheduled on the asyncio loop automatically.
+
+### Safety guards
+
+As an extra safety net, every low-level function in `libui.core` (the C extension) checks the calling thread at runtime. If you accidentally call a core function from the wrong thread, you get a clear `RuntimeError` instead of a crash:
+
+```
+RuntimeError: this function must be called from the main UI thread
+```
+
+This guard covers all operations: creating widgets, reading/writing properties, appending children, registering callbacks, showing dialogs, and drawing.
+
+### Using `core` directly
+
+The high-level API handles threading transparently. If you use `libui.core` directly (for tests, custom event loops, or advanced use cases), these rules apply:
+
+| Function | Thread-safe? | Notes |
+|---|---|---|
+| `core.queue_main(fn)` | Yes | Enqueues `fn` onto the main-thread completion queue |
+| `core.is_main_thread()` | Yes | Returns `True` if on the UI thread |
+| `core.quit()` | Yes | Can be called from any thread |
+| Everything else in `core` | **No** | Must be on the main thread — raises `RuntimeError` otherwise |
+
+For explicit cross-thread dispatch, use the bridge helpers:
+
+```python
+from libui.loop import invoke_on_main, invoke_on_main_async
+
+# From a sync background thread (blocks until complete):
+result = invoke_on_main(some_core_function, arg1, arg2)
+
+# From an async coroutine (non-blocking):
+result = await invoke_on_main_async(some_core_function, arg1, arg2)
+```
+
+Both schedule the function on the main thread via the completion queue and return the result (or re-raise any exception).
+
 ## Requirements
 
 - Python >= 3.13

@@ -1,8 +1,8 @@
 """Declarative UI layer for python-libui-ng."""
 
-from libui.declarative.state import Computed, ListState, State
-from libui.declarative.node import BuildContext, Node, stretchy
-from libui.declarative.nodes import (
+from libui.state import Computed, ListState, State
+from libui.node import BuildContext, Node, stretchy
+from libui.widgets import (
     # Containers
     VBox,
     HBox,
@@ -29,6 +29,7 @@ from libui.declarative.nodes import (
     Separator,
     # Drawing
     DrawArea,
+    ScrollingDrawArea,
     # Table
     DataTable,
     TextColumn,
@@ -86,6 +87,7 @@ __all__ = [
     "Separator",
     # Drawing
     "DrawArea",
+    "ScrollingDrawArea",
     # Table
     "DataTable",
     "TextColumn",

@@ -1,7 +1,7 @@
 """Tests for the declarative UI layer (state, nodes, app)."""
 
 import pytest
-from libui.declarative.state import ListState, State
+from libui.state import ListState, State
 from tests.conftest import flush_main
 
 
@@ -580,7 +580,7 @@ class TestCallbackValues:
 
     def test_make_two_way_user_cb(self):
         """Test that make_two_way calls user_cb with the value."""
-        from libui.declarative.node import make_two_way, Node
+        from libui.node import make_two_way, Node
 
         received = []
 
