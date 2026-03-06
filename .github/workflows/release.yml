@@ -29,26 +29,23 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Install package
-        run: |
-          pip install uv
-          if [ "$RUNNER_OS" = "macOS" ]; then
-            uv pip install --system -U ".[dev]"
-            rm -rf libui/
-          else
-            uv pip install --system -Ue ".[dev]"
-          fi
+      - name: Remove Git link.exe conflicting with MSVC
+        if: runner.os == 'Windows'
         shell: bash
+        run: rm -f "/c/Program Files/Git/usr/bin/link.exe"
+
+      - name: Install package
+        run: pip install uv && uv sync --extra dev
 
       - name: Run tests (Linux)
         if: runner.os == 'Linux'
         timeout-minutes: 5
-        run: xvfb-run pytest tests/ -v
+        run: uv run xvfb-run pytest tests/ -v
 
       - name: Run tests (macOS/Windows)
         if: runner.os != 'Linux'
         timeout-minutes: 5
-        run: pytest tests/ -v
+        run: uv run pytest tests/ -v
 
   build-wheels:
     strategy:
@@ -94,6 +91,11 @@ jobs:
       - name: Set up MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Remove Git link.exe conflicting with MSVC
+        if: runner.os == 'Windows'
+        shell: bash
+        run: rm -f "/c/Program Files/Git/usr/bin/link.exe"
 
       - name: Build wheel (macOS/Windows)
         if: runner.os != 'Linux'
