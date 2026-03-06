@@ -48,6 +48,10 @@ jobs:
       - name: Install package
         run: pip install uv && uv pip install --system -Ue ".[dev]"
 
+      - name: Build extension in-place (macOS)
+        if: runner.os == 'macOS'
+        run: python setup.py build_ext --inplace
+
       - name: Run tests (Linux)
         if: runner.os == 'Linux'
         timeout-minutes: 5
