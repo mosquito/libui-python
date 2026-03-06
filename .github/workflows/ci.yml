@@ -46,11 +46,15 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install package
-        run: pip install uv && uv pip install --system -Ue ".[dev]"
-
-      - name: Build extension in-place (macOS)
-        if: runner.os == 'macOS'
-        run: python setup.py build_ext --inplace
+        run: |
+          pip install uv
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            uv pip install --system -U ".[dev]"
+            rm -rf libui/
+          else
+            uv pip install --system -Ue ".[dev]"
+          fi
+        shell: bash
 
       - name: Run tests (Linux)
         if: runner.os == 'Linux'
