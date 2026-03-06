@@ -49,6 +49,7 @@ jobs:
           output-dir: dist
         env:
           CIBW_BUILD: ${{ steps.cibw.outputs.build }}
+          CIBW_ENABLE: cpython-prerelease
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_BEFORE_ALL_LINUX: yum install -y gtk3-devel pkgconfig
 
