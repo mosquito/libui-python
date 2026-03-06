@@ -21,43 +21,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Compute cibuildwheel target
+      - name: Install Linux dependencies
         if: runner.os == 'Linux'
-        id: cibw
-        run: echo "build=cp$(echo '${{ matrix.python-version }}' | tr -d .)-manylinux_x86_64" >> "$GITHUB_OUTPUT"
-
-      - name: Build manylinux wheel
-        if: runner.os == 'Linux'
-        uses: pypa/cibuildwheel@v3.4
-        with:
-          output-dir: dist
-        env:
-          CIBW_BUILD: ${{ steps.cibw.outputs.build }}
-          CIBW_ENABLE: cpython-prerelease
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          CIBW_BEFORE_ALL_LINUX: yum install -y gtk3-devel pkgconfig
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev pkg-config xvfb
 
       - name: Set up MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Build wheel (macOS/Windows)
-        if: runner.os != 'Linux'
-        run: pip install build && python -m build --wheel
-
-      - name: Remove source to avoid shadowing installed package
-        run: rm -rf libui/
-        shell: bash
-
-      - name: Install wheel and test deps
-        run: |
-          pip install dist/*.whl
-          pip install pytest pytest-asyncio
-        shell: bash
-
-      - name: Install Linux test dependencies
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0
+      - name: Install package
+        run: pip install uv && uv pip install --system -Ue ".[dev]"
 
       - name: Run tests (Linux)
         if: runner.os == 'Linux'
@@ -70,7 +43,6 @@ jobs:
         run: pytest tests/ -v
 
   build-wheels:
-    needs: test
     strategy:
       fail-fast: false
       matrix:
@@ -125,7 +97,6 @@ jobs:
           path: dist/*.whl
 
   build-sdist:
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -153,7 +124,7 @@ jobs:
 
   upload-release:
     if: always() && !cancelled()
-    needs: [build-wheels, build-sdist]
+    needs: [build-wheels, build-sdist, test]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -168,7 +139,7 @@ jobs:
           files: dist/*
 
   publish-pypi:
-    needs: [build-wheels, build-sdist]
+    needs: [build-wheels, build-sdist, test]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
