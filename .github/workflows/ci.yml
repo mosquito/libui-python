@@ -86,6 +86,10 @@ jobs:
           name: wheel-${{ matrix.os }}-py${{ matrix.python-version }}
           path: dist/
 
+      - name: Remove source to avoid shadowing installed package
+        run: rm -rf libui/
+        shell: bash
+
       - name: Install wheel and test deps
         run: |
           pip install dist/*.whl
