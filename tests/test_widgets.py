@@ -21,11 +21,11 @@ def test_button_create():
 
 
 def test_label_create():
-    l = core.Label("Hello")
-    assert l.text == "Hello"
-    l.text = "World"
-    assert l.text == "World"
-    l.destroy()
+    label = core.Label("Hello")
+    assert label.text == "Hello"
+    label.text = "World"
+    assert label.text == "World"
+    label.destroy()
 
 
 def test_box_append():

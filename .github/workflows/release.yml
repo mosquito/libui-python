@@ -39,6 +39,10 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_BEFORE_ALL_LINUX: yum install -y gtk3-devel pkgconfig
 
+      - name: Set up MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Build wheel (macOS/Windows)
         if: runner.os != 'Linux'
         run: pip install build && python -m build --wheel
@@ -74,8 +78,47 @@ jobs:
           name: sdist
           path: dist/*.tar.gz
 
+  test:
+    needs: build-wheels
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel-${{ matrix.os }}
+          path: dist/
+
+      - name: Install wheel and test deps
+        run: |
+          pip install dist/*.whl
+          pip install pytest pytest-asyncio
+        shell: bash
+
+      - name: Install Linux test dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0
+
+      - name: Run tests (Linux)
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        run: xvfb-run pytest tests/ -v
+
+      - name: Run tests (macOS/Windows)
+        if: runner.os != 'Linux'
+        timeout-minutes: 5
+        run: pytest tests/ -v
+
   upload-release:
-    needs: [build-wheels, build-sdist]
+    needs: [build-wheels, build-sdist, test]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -90,7 +133,7 @@ jobs:
           files: dist/*
 
   publish-pypi:
-    needs: [build-wheels, build-sdist]
+    needs: [build-wheels, build-sdist, test]
     runs-on: ubuntu-latest
     permissions:
       id-token: write

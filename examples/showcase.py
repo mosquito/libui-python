@@ -773,7 +773,7 @@ def build_table_tab(window):
 
 async def main():
     window_ref = [None]
-    menus = build_menus(window_ref)
+    build_menus(window_ref)
 
     window = libui.Window("Python libui-ng Showcase", 900, 700, has_menubar=True)
     window_ref[0] = window

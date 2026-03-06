@@ -7,7 +7,6 @@ Usage:
     python examples/showcase_declarative.py
 """
 
-import asyncio
 import math
 
 import libui

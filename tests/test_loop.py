@@ -1,7 +1,5 @@
 """Tests for the asyncio integration loop."""
 
-import asyncio
-import pytest
 
 from libui import core
 

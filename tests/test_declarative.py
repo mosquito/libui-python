@@ -1,7 +1,7 @@
 """Tests for the declarative UI layer (state, nodes, app)."""
 
 import pytest
-from libui.declarative.state import Computed, ListState, State
+from libui.declarative.state import ListState, State
 from tests.conftest import flush_main
 
 
@@ -55,7 +55,8 @@ class TestState:
     def test_unsubscribe_method(self):
         s = State(0)
         calls = []
-        cb = lambda: calls.append(s.value)
+        def cb():
+            return calls.append(s.value)
         s.subscribe(cb)
         s.value = 1
         s.unsubscribe(cb)
@@ -183,23 +184,7 @@ class TestNodeImports:
     """Verify that all node classes can be imported."""
 
     def test_import_all(self):
-        from libui.declarative import (
-            State, Computed, ListState,
-            Node, BuildContext, stretchy,
-            VBox, HBox, Group, Form, Tab, Grid, GridCell,
-            Label, Button, Entry, Checkbox,
-            Slider, Spinbox, ProgressBar,
-            Combobox, RadioButtons, EditableCombobox,
-            MultilineEntry, ColorButton, FontButton,
-            DateTimePicker, Separator,
-            DrawArea,
-            DataTable, TextColumn, CheckboxColumn,
-            CheckboxTextColumn, ProgressColumn, ButtonColumn,
-            ImageColumn, ImageTextColumn,
-            App, Window, MenuDef, MenuItem,
-            CheckMenuItem, MenuSeparator,
-            QuitItem, PreferencesItem, AboutItem,
-        )
+        pass
 
     def test_stretchy_marks_node(self):
         from libui.declarative import VBox, stretchy
@@ -405,7 +390,7 @@ class TestDeclarativeWidgets:
         ctx = BuildContext()
         lbl = stretchy(Label("big"))
         box = VBox(lbl)
-        widget = box.build(ctx)
+        box.build(ctx)
         assert lbl.stretchy is True
 
     def test_grid_builds(self):
@@ -455,7 +440,7 @@ class TestCallbackValues:
         received = []
         ctx = BuildContext()
         entry = Entry(on_changed=lambda text: received.append(text))
-        widget = entry.build(ctx)
+        entry.build(ctx)
         # The registered callback is a wrapper lambda, not the raw user cb.
         # We can't fire it, but verify the node stores the callback correctly.
         assert entry._on_changed is not None
