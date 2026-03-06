@@ -36,11 +36,18 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install Linux dependencies
+      - name: Build manylinux wheel
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev pkg-config
+        uses: pypa/cibuildwheel@v2.22
+        with:
+          output-dir: dist
+        env:
+          CIBW_BUILD: cp313-manylinux_x86_64
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_BEFORE_ALL_LINUX: yum install -y gtk3-devel pkgconfig
 
-      - name: Build wheel
+      - name: Build wheel (macOS/Windows)
+        if: runner.os != 'Linux'
         run: pip install build && python -m build --wheel
 
       - uses: actions/upload-artifact@v4

@@ -8,7 +8,13 @@ version = "0.1.0"
 description = "Python bindings for libui-ng"
 readme = "README.md"
 requires-python = ">=3.13"
+license = "MIT"
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/mosquito/libui-python"
+Repository = "https://github.com/mosquito/libui-python"
+Issues = "https://github.com/mosquito/libui-python/issues"
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio", "ruff"]

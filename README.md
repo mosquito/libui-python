@@ -1,5 +1,10 @@
 # python-libui-ng
 
+[![PyPI Version](https://img.shields.io/pypi/v/libui.svg)](https://pypi.org/project/libui/)
+[![Python](https://img.shields.io/pypi/pyversions/libui.svg)](https://pypi.org/project/libui/)
+[![License: MIT](https://img.shields.io/github/license/mosquito/libui-python.svg)](https://github.com/mosquito/libui-python/blob/main/LICENSE)
+[![GitHub Issues](https://img.shields.io/github/issues/mosquito/libui-python.svg)](https://github.com/mosquito/libui-python/issues)
+
 Native GUI toolkit for Python. Lightweight bindings for [libui-ng](https://github.com/libui-ng/libui-ng) — real native widgets on Linux (GTK+3), macOS (Cocoa), and Windows (Win32).
 
 No electron. No web views. Just native controls.
@@ -985,4 +990,4 @@ python examples/table.py               # data table
 
 ## License
 
-See [LICENSE](LICENSE).
+MIT — see [LICENSE](https://github.com/mosquito/libui-python/blob/main/LICENSE).
