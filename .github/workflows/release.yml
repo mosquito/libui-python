@@ -5,7 +5,72 @@ on:
     types: [published]
 
 jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Compute cibuildwheel target
+        if: runner.os == 'Linux'
+        id: cibw
+        run: echo "build=cp$(echo '${{ matrix.python-version }}' | tr -d .)-manylinux_x86_64" >> "$GITHUB_OUTPUT"
+
+      - name: Build manylinux wheel
+        if: runner.os == 'Linux'
+        uses: pypa/cibuildwheel@v3.4
+        with:
+          output-dir: dist
+        env:
+          CIBW_BUILD: ${{ steps.cibw.outputs.build }}
+          CIBW_ENABLE: cpython-prerelease
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_BEFORE_ALL_LINUX: yum install -y gtk3-devel pkgconfig
+
+      - name: Set up MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build wheel (macOS/Windows)
+        if: runner.os != 'Linux'
+        run: pip install build && python -m build --wheel
+
+      - name: Remove source to avoid shadowing installed package
+        run: rm -rf libui/
+        shell: bash
+
+      - name: Install wheel and test deps
+        run: |
+          pip install dist/*.whl
+          pip install pytest pytest-asyncio
+        shell: bash
+
+      - name: Install Linux test dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0
+
+      - name: Run tests (Linux)
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        run: xvfb-run pytest tests/ -v
+
+      - name: Run tests (macOS/Windows)
+        if: runner.os != 'Linux'
+        timeout-minutes: 5
+        run: pytest tests/ -v
+
   build-wheels:
+    needs: test
     strategy:
       fail-fast: false
       matrix:
@@ -60,6 +125,7 @@ jobs:
           path: dist/*.whl
 
   build-sdist:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -85,50 +151,6 @@ jobs:
           name: sdist
           path: dist/*.tar.gz
 
-  test:
-    needs: build-wheels
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: wheel-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: dist/
-
-      - name: Remove source to avoid shadowing installed package
-        run: rm -rf libui/
-        shell: bash
-
-      - name: Install wheel and test deps
-        run: |
-          pip install dist/*.whl
-          pip install pytest pytest-asyncio
-        shell: bash
-
-      - name: Install Linux test dependencies
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0
-
-      - name: Run tests (Linux)
-        if: runner.os == 'Linux'
-        timeout-minutes: 5
-        run: xvfb-run pytest tests/ -v
-
-      - name: Run tests (macOS/Windows)
-        if: runner.os != 'Linux'
-        timeout-minutes: 5
-        run: pytest tests/ -v
-
   upload-release:
     if: always() && !cancelled()
     needs: [build-wheels, build-sdist]
@@ -146,7 +168,7 @@ jobs:
           files: dist/*
 
   publish-pypi:
-    needs: [build-wheels, build-sdist, test]
+    needs: [build-wheels, build-sdist]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
