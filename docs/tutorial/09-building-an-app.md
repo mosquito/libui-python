@@ -7,8 +7,10 @@ This chapter puts everything together into a complete application — a contact 
 ```{literalinclude} examples/22-full-app.py
 ```
 
-```{image} screenshots/22-full-app.png
+```{figure} screenshots/22-full-app.png
 :alt: Full application
+:target: _images/22-full-app.png
+:class: screenshot
 ```
 
 ## Patterns used

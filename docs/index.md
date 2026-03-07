@@ -11,8 +11,10 @@ No Electron. No web views. Just native controls.
 - **Async-first** — built-in asyncio integration with thread-safe UI updates
 - **Cross-platform** — one codebase, native look and feel everywhere
 
-```{image} tutorial/screenshots/showcase.png
+```{figure} tutorial/screenshots/showcase.png
 :alt: Widget showcase
+:target: _images/showcase.png
+:class: screenshot
 ```
 
 ## Quick example
@@ -39,8 +41,10 @@ async def main():
 libui.run(main())
 ```
 
-```{image} tutorial/screenshots/00-hello-world.png
+```{figure} tutorial/screenshots/00-hello-world.png
 :alt: Quick example
+:target: _images/00-hello-world.png
+:class: screenshot
 ```
 
 ## Screenshots
@@ -52,16 +56,19 @@ Native look and feel on every platform — the same code, rendered with real OS 
 
 :::{grid-item-card} macOS
 :img-top: screenshots/showcase-macos.png
+:link: _images/showcase-macos.png
 Cocoa
 :::
 
 :::{grid-item-card} Linux
 :img-top: screenshots/showcase-linux.png
+:link: _images/showcase-linux.png
 GTK+3
 :::
 
 :::{grid-item-card} Windows
 :img-top: screenshots/showcase-windows.png
+:link: _images/showcase-windows.png
 Win32
 :::
 

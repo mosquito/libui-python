@@ -9,8 +9,10 @@ The `on_draw` callback receives a drawing context and the area dimensions:
 ```{literalinclude} examples/17-drawing-shapes.py
 ```
 
-```{image} screenshots/17-drawing-shapes.png
+```{figure} screenshots/17-drawing-shapes.png
 :alt: Drawing shapes
+:target: _images/17-drawing-shapes.png
+:class: screenshot
 ```
 
 The drawing workflow is:
@@ -51,8 +53,10 @@ Both linear and radial gradients are supported:
 ```{literalinclude} examples/18-drawing-gradients.py
 ```
 
-```{image} screenshots/18-drawing-gradients.png
+```{figure} screenshots/18-drawing-gradients.png
 :alt: Gradients
+:target: _images/18-drawing-gradients.png
+:class: screenshot
 ```
 
 Gradient stops are tuples of `(position, r, g, b, a)` where position is 0.0 to 1.0.
@@ -64,8 +68,10 @@ Gradient stops are tuples of `(position, r, g, b, a)` where position is 0.0 to 1
 ```{literalinclude} examples/19-drawing-text.py
 ```
 
-```{image} screenshots/19-drawing-text.png
+```{figure} screenshots/19-drawing-text.png
 :alt: Styled text
+:target: _images/19-drawing-text.png
+:class: screenshot
 ```
 
 ### Text attributes

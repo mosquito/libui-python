@@ -9,8 +9,10 @@ libui-python provides several containers for arranging widgets. This chapter cov
 ```{literalinclude} examples/03-vbox-hbox.py
 ```
 
-```{image} screenshots/03-vbox-hbox.png
+```{figure} screenshots/03-vbox-hbox.png
 :alt: VBox and HBox layout
+:target: _images/03-vbox-hbox.png
+:class: screenshot
 ```
 
 ## Form
@@ -20,8 +22,10 @@ libui-python provides several containers for arranging widgets. This chapter cov
 ```{literalinclude} examples/04-form-layout.py
 ```
 
-```{image} screenshots/04-form-layout.png
+```{figure} screenshots/04-form-layout.png
 :alt: Form layout
+:target: _images/04-form-layout.png
+:class: screenshot
 ```
 
 Each row is a tuple: `(label, widget)` or `(label, widget, stretchy)`.
@@ -33,8 +37,10 @@ Each row is a tuple: `(label, widget)` or `(label, widget, stretchy)`.
 ```{literalinclude} examples/05-tabs.py
 ```
 
-```{image} screenshots/05-tabs.png
+```{figure} screenshots/05-tabs.png
 :alt: Tab container
+:target: _images/05-tabs.png
+:class: screenshot
 ```
 
 ## Grid
@@ -44,8 +50,10 @@ Each row is a tuple: `(label, widget)` or `(label, widget, stretchy)`.
 ```{literalinclude} examples/06-grid-layout.py
 ```
 
-```{image} screenshots/06-grid-layout.png
+```{figure} screenshots/06-grid-layout.png
 :alt: Grid layout
+:target: _images/06-grid-layout.png
+:class: screenshot
 ```
 
 Key `GridCell` parameters:

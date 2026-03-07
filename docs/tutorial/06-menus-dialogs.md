@@ -7,8 +7,10 @@ Menus are defined with `MenuDef` and passed to `app.build()`. They must be creat
 ```{literalinclude} examples/15-menus.py
 ```
 
-```{image} screenshots/15-menus.png
+```{figure} screenshots/15-menus.png
 :alt: Menus
+:target: _images/15-menus.png
+:class: screenshot
 ```
 
 ### Menu item types

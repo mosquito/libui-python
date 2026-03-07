@@ -7,8 +7,10 @@
 ```{literalinclude} examples/12-table-basic.py
 ```
 
-```{image} screenshots/12-table-basic.png
+```{figure} screenshots/12-table-basic.png
 :alt: Basic table
+:target: _images/12-table-basic.png
+:class: screenshot
 ```
 
 Each row is a dictionary. Column descriptors map dictionary keys to table columns:
@@ -23,8 +25,10 @@ Columns can be made editable so users can modify data in place:
 ```{literalinclude} examples/13-table-editable.py
 ```
 
-```{image} screenshots/13-table-editable.png
+```{figure} screenshots/13-table-editable.png
 :alt: Editable table
+:target: _images/13-table-editable.png
+:class: screenshot
 ```
 
 `TextColumn(..., editable=True)` allows inline text editing. `CheckboxColumn` and `CheckboxTextColumn` support editable checkboxes.
@@ -36,8 +40,10 @@ Columns can be made editable so users can modify data in place:
 ```{literalinclude} examples/14-table-buttons.py
 ```
 
-```{image} screenshots/14-table-buttons.png
+```{figure} screenshots/14-table-buttons.png
 :alt: Table with buttons
+:target: _images/14-table-buttons.png
+:class: screenshot
 ```
 
 ## Column types reference

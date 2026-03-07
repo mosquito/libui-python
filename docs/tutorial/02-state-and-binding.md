@@ -9,8 +9,10 @@ State is the foundation of the declarative API. This chapter covers `State`, `Co
 ```{literalinclude} examples/01-state-binding.py
 ```
 
-```{image} screenshots/01-state-binding.png
+```{figure} screenshots/01-state-binding.png
 :alt: State binding demo
+:target: _images/01-state-binding.png
+:class: screenshot
 ```
 
 Key points:
@@ -27,8 +29,10 @@ Key points:
 ```{literalinclude} examples/02-computed-state.py
 ```
 
-```{image} screenshots/02-computed-state.png
+```{figure} screenshots/02-computed-state.png
 :alt: Computed state demo
+:target: _images/02-computed-state.png
+:class: screenshot
 ```
 
 Key points:

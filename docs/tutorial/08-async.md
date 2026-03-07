@@ -9,8 +9,10 @@ Use `asyncio.create_task()` to run background work while the UI stays responsive
 ```{literalinclude} examples/20-async-background.py
 ```
 
-```{image} screenshots/20-async-background.png
+```{figure} screenshots/20-async-background.png
 :alt: Background tasks
+:target: _images/20-async-background.png
+:class: screenshot
 ```
 
 The proxy layer handles thread safety — you can set widget properties from async code without worrying about which thread you're on.
@@ -22,8 +24,10 @@ Event handlers can be `async def` functions. The framework automatically schedul
 ```{literalinclude} examples/21-async-callbacks.py
 ```
 
-```{image} screenshots/21-async-callbacks.png
+```{figure} screenshots/21-async-callbacks.png
 :alt: Async callbacks
+:target: _images/21-async-callbacks.png
+:class: screenshot
 ```
 
 Key points:

@@ -7,8 +7,10 @@ Every libui-python application follows the same pattern: create an `App`, build 
 ```{literalinclude} examples/00-hello-world.py
 ```
 
-```{image} screenshots/00-hello-world.png
+```{figure} screenshots/00-hello-world.png
 :alt: Hello world window
+:target: _images/00-hello-world.png
+:class: screenshot
 ```
 
 Key points:
