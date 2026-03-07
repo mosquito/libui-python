@@ -13,12 +13,9 @@ dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/mosquito/libui-python"
+Documentation = "https://mosquito.github.io/libui-python/"
 Repository = "https://github.com/mosquito/libui-python"
 Issues = "https://github.com/mosquito/libui-python/issues"
-
-[project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio", "ruff"]
-docs = ["sphinx>=7", "furo", "myst-parser", "sphinx-copybutton", "sphinx-design"]
 
 [dependency-groups]
 dev = ["pytest", "pytest-asyncio", "ruff"]
