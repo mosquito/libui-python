@@ -50,6 +50,9 @@ jobs:
         shell: bash
         run: rm -f "/c/Program Files/Git/usr/bin/link.exe"
 
+      - name: Apply patches to libui-ng
+        run: python scripts/apply_patches.py
+
       - name: Install package
         run: pip install uv && uv sync --extra dev
 

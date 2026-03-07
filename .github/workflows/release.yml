@@ -34,8 +34,11 @@ jobs:
         shell: bash
         run: rm -f "/c/Program Files/Git/usr/bin/link.exe"
 
+      - name: Apply patches to libui-ng
+        run: python scripts/apply_patches.py
+
       - name: Install package
-        run: pip install uv && uv sync --extra dev
+        run: pip install uv && uv sync --group dev
 
       - name: Run tests (Linux)
         if: runner.os == 'Linux'
@@ -71,6 +74,9 @@ jobs:
       - name: Set version
         run: sed -i.bak 's/^version = .*/version = "${{ steps.version.outputs.VERSION }}"/' pyproject.toml
         shell: bash
+
+      - name: Apply patches to libui-ng
+        run: python scripts/apply_patches.py
 
       - name: Compute cibuildwheel target
         if: runner.os == 'Linux'
@@ -123,6 +129,9 @@ jobs:
 
       - name: Set version
         run: sed -i.bak 's/^version = .*/version = "${{ steps.version.outputs.VERSION }}"/' pyproject.toml
+
+      - name: Apply patches to libui-ng
+        run: python scripts/apply_patches.py
 
       - name: Build sdist
         run: pip install build && python -m build --sdist

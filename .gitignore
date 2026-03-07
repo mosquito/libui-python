@@ -3,3 +3,5 @@
 *.pyd
 .*
 *.pyi
+_build
+dist

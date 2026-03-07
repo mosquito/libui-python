@@ -1,0 +1,13 @@
+diff --git a/darwin/group.m b/darwin/group.m
+index 2cfcdf47..457b6639 100644
+--- a/darwin/group.m
++++ b/darwin/group.m
+@@ -180,7 +180,7 @@ void uiGroupSetMargined(uiGroup *g, int margined)
+ 	g->box = [[NSBox alloc] initWithFrame:NSZeroRect];
+ 	[g->box setTitle:uiprivToNSString(title)];
+ 	[g->box setBoxType:NSBoxPrimary];
+-	[g->box setBorderType:NSLineBorder];
++	[g->box setBorderType:NSBezelBorder];
+ 	[g->box setTransparent:NO];
+ 	[g->box setTitlePosition:NSAtTop];
+ 	// we can't use uiDarwinSetControlFont() because the selector is different

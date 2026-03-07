@@ -1,0 +1,27 @@
+diff --git a/darwin/form.m b/darwin/form.m
+index 9e77184b..4392dd0f 100644
+--- a/darwin/form.m
++++ b/darwin/form.m
+@@ -371,12 +371,18 @@ - (void)append:(NSString *)label c:(uiControl *)c stretchy:(int)stretchy
+ 	// make sure controls don't hug their horizontal direction so they fill the width of the view
+ 	uiDarwinControlSetHuggingPriority(uiDarwinControl(fc.c), NSLayoutPriorityDefaultLow, NSLayoutConstraintOrientationHorizontal);
+ 
+-	// and constrain the baselines to position the label vertically
+-	// if the view is a scroll view, align tops, not baselines
+-	// this is what Interface Builder does
+-	attribute = NSLayoutAttributeBaseline;
++	// and constrain the labels to position them vertically
++	// - scroll views: align tops (this is what Interface Builder does)
++	// - text controls (NSTextField, NSSecureTextField, NSComboBox,
++	//   NSTokenField): align baselines for proper text alignment
++	// - everything else (NSSlider, NSProgressIndicator, NSButton, etc.):
++	//   center vertically for consistent visual alignment
++	attribute = NSLayoutAttributeCenterY;
+ 	if ([[fc view] isKindOfClass:[NSScrollView class]])
+ 		attribute = NSLayoutAttributeTop;
++	else if ([[fc view] isKindOfClass:[NSTextField class]] ||
++		 [[fc view] isKindOfClass:[NSComboBox class]])
++		attribute = NSLayoutAttributeBaseline;
+ 	fc.baseline = uiprivMkConstraint(fc.label, attribute,
+ 		NSLayoutRelationEqual,
+ 		[fc view], attribute,

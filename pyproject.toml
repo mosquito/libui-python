@@ -16,8 +16,9 @@ Homepage = "https://github.com/mosquito/libui-python"
 Repository = "https://github.com/mosquito/libui-python"
 Issues = "https://github.com/mosquito/libui-python/issues"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = ["pytest", "pytest-asyncio", "ruff"]
+docs = ["sphinx>=7", "furo", "myst-parser", "sphinx-copybutton", "sphinx-design"]
 
 [tool.setuptools.packages.find]
 where = ["."]

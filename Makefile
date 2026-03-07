@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: stubs lint format test clean
+.PHONY: stubs lint format test clean patch screenshots
 
 stubs: libui/core.pyi
 
@@ -17,6 +17,12 @@ format:
 
 test:
 	$(PYTHON) -m pytest tests/
+
+patch:
+	$(PYTHON) scripts/apply_patches.py
+
+screenshots:
+	$(PYTHON) scripts/screenshots.py
 
 clean:
 	rm -f libui/core.pyi

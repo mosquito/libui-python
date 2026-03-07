@@ -1,0 +1,35 @@
+diff --git a/darwin/grid.m b/darwin/grid.m
+index cc40a570..6a830097 100644
+--- a/darwin/grid.m
++++ b/darwin/grid.m
+@@ -160,6 +160,13 @@ - (NSView *)view
+ 	return (NSView *) uiControlHandle(self.c);
+ }
+ 
++- (NSSize)intrinsicContentSize
++{
++	// Forward the child control's intrinsic content size so that
++	// content hugging on this wrapper view is meaningful to Auto Layout.
++	return [[self view] intrinsicContentSize];
++}
++
+ @end
+ 
+ @implementation gridView
+@@ -511,12 +518,16 @@ - (void)establishOurConstraints
+ 		else
+ 			priority = NSLayoutPriorityDefaultHigh;
+ 		uiDarwinControlSetHuggingPriority(uiDarwinControl(gc.c), priority, NSLayoutConstraintOrientationHorizontal);
++		// Also set hugging on the gridChild wrapper so Auto Layout
++		// can directly see the priority at the grid constraint level.
++		[gc setContentHuggingPriority:priority forOrientation:NSLayoutConstraintOrientationHorizontal];
+ 		// same for vertical direction
+ 		if (vexpand[gc.top - ymin] || gc.yspan != 1)
+ 			priority = NSLayoutPriorityDefaultLow;
+ 		else
+ 			priority = NSLayoutPriorityDefaultHigh;
+ 		uiDarwinControlSetHuggingPriority(uiDarwinControl(gc.c), priority, NSLayoutConstraintOrientationVertical);
++		[gc setContentHuggingPriority:priority forOrientation:NSLayoutConstraintOrientationVertical];
+ 	}
+ 
+ 	// TODO make all expanding rows/columns the same height/width
