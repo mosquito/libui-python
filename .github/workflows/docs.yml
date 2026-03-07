@@ -23,10 +23,9 @@ jobs:
 
       - name: Resolve LFS files
         run: |
-          git lfs install
-          git lfs pull
-          echo "=== LFS status ==="
-          git lfs status
+          git lfs install --force
+          git lfs fetch --all
+          git lfs checkout
           echo "=== source file check ==="
           file docs/tutorial/screenshots/*.png
           file docs/screenshots/*.png
