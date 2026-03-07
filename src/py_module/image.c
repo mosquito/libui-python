@@ -45,6 +45,13 @@ Image_append(PyObject *self, PyObject *args)
         return NULL;
     }
 
+    if (pixel_width <= 0 || pixel_height <= 0 || byte_stride <= 0) {
+        PyBuffer_Release(&buf);
+        PyErr_SetString(PyExc_ValueError,
+            "pixel_width, pixel_height and byte_stride must be positive");
+        return NULL;
+    }
+
     if (buf.len < (Py_ssize_t)byte_stride * pixel_height) {
         PyBuffer_Release(&buf);
         PyErr_SetString(PyExc_ValueError, "buffer too small for given dimensions");

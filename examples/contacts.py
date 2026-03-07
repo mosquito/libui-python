@@ -204,15 +204,15 @@ def build_editor(
         status.set("New contact — fill in the details below.")
 
     def save_contact():
-        f, l = first.value.strip(), last.value.strip()
-        if not f and not l:
+        fn, ln = first.value.strip(), last.value.strip()
+        if not fn and not ln:
             status.set("Error: name cannot be empty.")
             return
 
         row = {
             "selected": 0,
-            "first": f,
-            "last": l,
+            "first": fn,
+            "last": ln,
             "email": email.value.strip(),
             "phone": phone.value.strip(),
             "company": company.value.strip(),
@@ -223,11 +223,11 @@ def build_editor(
         idx = editing_index.value
         if is_new.value or idx < 0 or idx >= len(contacts):
             contacts.append(row)
-            status.set(f"Added: {f} {l}")
+            status.set(f"Added: {fn} {ln}")
             editing_index.set(len(contacts) - 1)
         else:
             contacts[idx] = row
-            status.set(f"Updated: {f} {l}")
+            status.set(f"Updated: {fn} {ln}")
         is_new.set(False)
 
     def delete_contact():
