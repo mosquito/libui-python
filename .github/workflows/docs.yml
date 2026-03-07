@@ -24,8 +24,9 @@ jobs:
       - name: Resolve LFS files
         run: |
           git lfs install --force
-          git lfs fetch --all
-          git lfs checkout
+          git lfs fetch
+          find . -name '*.png' -size -200c -delete
+          git checkout -- '*.png'
           echo "=== source file check ==="
           file docs/tutorial/screenshots/*.png
           file docs/screenshots/*.png
