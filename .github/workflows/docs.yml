@@ -22,9 +22,6 @@ jobs:
           submodules: recursive
           lfs: true
 
-      - name: Fetch LFS objects
-        run: git lfs pull
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
@@ -40,6 +37,15 @@ jobs:
 
       - name: Build docs
         run: uv run sphinx-build -b html docs docs/_build/html
+
+      - name: Debug build output
+        run: |
+          echo "=== _images contents ==="
+          ls -la docs/_build/html/_images/ || true
+          echo "=== file type check ==="
+          file docs/_build/html/_images/*.png || true
+          echo "=== full tree ==="
+          find docs/_build/html -type f | sort
 
       - uses: actions/upload-pages-artifact@v3
         with:
