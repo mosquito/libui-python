@@ -2,6 +2,7 @@
 *.dlyb
 *.pyd
 .*
+!.gitattributes
 *.pyi
 _build
 dist
