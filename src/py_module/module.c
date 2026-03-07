@@ -3,6 +3,36 @@
  */
 #include "module.h"
 
+#ifdef _WIN32
+#include <windows.h>
+
+/* Set system DPI awareness so the UI is crisp on HiDPI displays.
+ * Uses SYSTEM_AWARE: Windows scales layout coordinates automatically
+ * while rendering text and controls at native DPI (no bitmap stretching).
+ * Loaded dynamically so we compile on any SDK version. */
+static void
+enable_dpi_awareness(void)
+{
+    typedef BOOL (WINAPI *SetDpiAwarenessCtx_fn)(HANDLE);
+    HMODULE user32 = GetModuleHandleA("user32.dll");
+    if (!user32) return;
+    SetDpiAwarenessCtx_fn fn = (SetDpiAwarenessCtx_fn)
+        GetProcAddress(user32, "SetProcessDpiAwarenessContext");
+    if (fn) {
+        /* DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = (HANDLE)-2 */
+        fn((HANDLE)(intptr_t)-2);
+        return;
+    }
+    /* Fallback for Windows 8.1 */
+    typedef HRESULT (WINAPI *SetDpiAwareness_fn)(int);
+    HMODULE shcore = LoadLibraryA("shcore.dll");
+    if (!shcore) return;
+    SetDpiAwareness_fn fn2 = (SetDpiAwareness_fn)
+        GetProcAddress(shcore, "SetProcessDpiAwareness");
+    if (fn2) fn2(1);  /* PROCESS_SYSTEM_DPI_AWARE */
+}
+#endif
+
 /* -- Global asyncio loop ------------------------------------------- */
 
 PyObject *g_asyncio_loop = NULL;
@@ -60,6 +90,9 @@ static int g_main_steps_called = 0;
 static PyObject *
 mod_init(PyObject *Py_UNUSED(self), PyObject *Py_UNUSED(args))
 {
+#ifdef _WIN32
+    enable_dpi_awareness();
+#endif
     uiInitOptions opts = {.Size = sizeof(uiInitOptions)};
     const char *err = uiInit(&opts);
     if (err != NULL) {
