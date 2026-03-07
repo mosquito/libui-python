@@ -1,9 +1,15 @@
 """Async background tasks — concurrent work with UI updates."""
+
 import asyncio
 import libui
 from libui.declarative import (
-    App, Window, VBox,
-    Label, Button, ProgressBar, State,
+    App,
+    Window,
+    VBox,
+    Label,
+    Button,
+    ProgressBar,
+    State,
 )
 
 
@@ -33,14 +39,18 @@ async def main():
 
     asyncio.create_task(ticker())
 
-    app.build(window=Window(
-        "Async Background", 400, 200,
-        child=VBox(
-            Label(text=status),
-            ProgressBar(value=progress),
-            Button("Start Work", on_clicked=do_work),
-        ),
-    ))
+    app.build(
+        window=Window(
+            "Async Background",
+            400,
+            200,
+            child=VBox(
+                Label(text=status),
+                ProgressBar(value=progress),
+                Button("Start Work", on_clicked=do_work),
+            ),
+        )
+    )
 
     app.show()
     await app.wait()

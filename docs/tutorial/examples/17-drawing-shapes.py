@@ -1,4 +1,5 @@
 """Drawing shapes — rectangles, circles, triangles, and strokes."""
+
 import math
 import libui
 from libui.declarative import App, Window, VBox, DrawArea, stretchy
@@ -57,10 +58,14 @@ def on_draw(ctx, area_w, area_h, clip_x, clip_y, clip_w, clip_h):
 async def main():
     app = App()
 
-    app.build(window=Window(
-        "Drawing Shapes", 500, 250,
-        child=VBox(stretchy(DrawArea(on_draw=on_draw))),
-    ))
+    app.build(
+        window=Window(
+            "Drawing Shapes",
+            500,
+            250,
+            child=VBox(stretchy(DrawArea(on_draw=on_draw))),
+        )
+    )
 
     app.show()
     await app.wait()

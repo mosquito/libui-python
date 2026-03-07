@@ -6,6 +6,7 @@ Launches each example, waits for its window, captures a screenshot
 with native macOS window shadow via screencapture -l. No extra
 dependencies — uses ctypes + CoreGraphics to find the CGWindowID.
 """
+
 import argparse
 import ctypes
 import ctypes.util
@@ -38,7 +39,9 @@ if sys.platform == "darwin":
     _cf.CFDictionaryGetValue.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
     _cf.CFStringCreateWithCString.restype = ctypes.c_void_p
     _cf.CFStringCreateWithCString.argtypes = [
-        ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint32,
+        ctypes.c_void_p,
+        ctypes.c_char_p,
+        ctypes.c_uint32,
     ]
     _cf.CFNumberGetValue.restype = ctypes.c_bool
     _cf.CFNumberGetValue.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
@@ -65,13 +68,16 @@ if sys.platform == "darwin":
     class _CGRect(ctypes.Structure):
         class _CGPoint(ctypes.Structure):
             _fields_ = [("x", ctypes.c_double), ("y", ctypes.c_double)]
+
         class _CGSize(ctypes.Structure):
             _fields_ = [("width", ctypes.c_double), ("height", ctypes.c_double)]
+
         _fields_ = [("origin", _CGPoint), ("size", _CGSize)]
 
     _cg.CGRectMakeWithDictionaryRepresentation.restype = ctypes.c_bool
     _cg.CGRectMakeWithDictionaryRepresentation.argtypes = [
-        ctypes.c_void_p, ctypes.POINTER(_CGRect),
+        ctypes.c_void_p,
+        ctypes.POINTER(_CGRect),
     ]
 
 
@@ -131,15 +137,22 @@ def main():
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--output-dir", type=Path,
-        default=Path(__file__).resolve().parent.parent / "docs" / "tutorial" / "screenshots",
+        "--output-dir",
+        type=Path,
+        default=Path(__file__).resolve().parent.parent
+        / "docs"
+        / "tutorial"
+        / "screenshots",
     )
     parser.add_argument(
-        "--delay", type=float, default=1.5,
+        "--delay",
+        type=float,
+        default=1.5,
         help="Seconds to wait after window appears before capture",
     )
     parser.add_argument(
-        "examples", nargs="*",
+        "examples",
+        nargs="*",
         help="Specific example filenames (e.g. 00-hello-world.py). Default: all.",
     )
     args = parser.parse_args()
@@ -165,7 +178,8 @@ def main():
 
         proc = subprocess.Popen(
             [sys.executable, str(script)],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
 
         try:
@@ -177,9 +191,14 @@ def main():
 
             time.sleep(args.delay)
 
-            subprocess.check_call([
-                "screencapture", "-l", str(wid), str(output),
-            ])
+            subprocess.check_call(
+                [
+                    "screencapture",
+                    "-l",
+                    str(wid),
+                    str(output),
+                ]
+            )
             print("OK")
         finally:
             proc.kill()

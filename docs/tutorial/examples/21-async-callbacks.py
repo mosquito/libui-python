@@ -1,9 +1,15 @@
 """Async callbacks — event handlers that are coroutines."""
+
 import asyncio
 import libui
 from libui.declarative import (
-    App, Window, VBox,
-    Label, Button, ProgressBar, State,
+    App,
+    Window,
+    VBox,
+    Label,
+    Button,
+    ProgressBar,
+    State,
 )
 
 
@@ -35,16 +41,20 @@ async def main():
         """A sync callback runs on the main thread."""
         status.set("Sync action executed!")
 
-    app.build(window=Window(
-        "Async Callbacks", 450, 250,
-        child=VBox(
-            Label(text=status),
-            ProgressBar(value=progress),
-            Button("Fetch Data (async)", on_clicked=fetch_data),
-            Button("Save Data (async)", on_clicked=save_data),
-            Button("Sync Action", on_clicked=sync_action),
-        ),
-    ))
+    app.build(
+        window=Window(
+            "Async Callbacks",
+            450,
+            250,
+            child=VBox(
+                Label(text=status),
+                ProgressBar(value=progress),
+                Button("Fetch Data (async)", on_clicked=fetch_data),
+                Button("Save Data (async)", on_clicked=save_data),
+                Button("Sync Action", on_clicked=sync_action),
+            ),
+        )
+    )
 
     app.show()
     await app.wait()

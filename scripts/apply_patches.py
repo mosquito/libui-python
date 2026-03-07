@@ -1,4 +1,5 @@
 """Apply patches from patches/ to the libui-ng submodule (idempotent)."""
+
 import subprocess
 from pathlib import Path
 

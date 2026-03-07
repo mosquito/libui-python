@@ -16,12 +16,10 @@ import asyncio
 import json
 
 import libui
-from libui import core
 from libui.declarative import (
     AboutItem,
     App,
     Button,
-    Checkbox,
     CheckboxTextColumn,
     Combobox,
     DataTable,
@@ -220,7 +218,7 @@ def build_editor(
             "company": company.value.strip(),
             "category": CATEGORIES[category.value],
             "notes": notes.value.strip(),
-            }
+        }
 
         idx = editing_index.value
         if is_new.value or idx < 0 or idx >= len(contacts):
@@ -302,9 +300,7 @@ def build_list_panel(
         on_row_double_clicked=on_row_dblclick,
     )
 
-    count_label = Label(
-        match_count.map(lambda n: f"{n} contact(s)")
-    )
+    count_label = Label(match_count.map(lambda n: f"{n} contact(s)"))
 
     # Keep count in sync
     def update_count(*_args, **_kwargs):
@@ -421,12 +417,14 @@ def build_menus(app: App, contacts: ListState, progress: State[int]):
             await app.msg_box_error_async("Import Error", str(e))
             progress.set(0)
             return
+
         # Replace all data on main thread
         def _replace():
             while len(contacts):
                 contacts.pop()
             for r in rows:
                 contacts.append(r)
+
         invoke_on_main(_replace)
         await app.msg_box_async("Import", f"Loaded {len(rows)} contacts from:\n{path}")
         progress.set(0)

@@ -451,11 +451,13 @@ def _make_shapes():
         lb.type = libui.BrushType.LINEAR_GRADIENT
         lb.x0, lb.y0 = x, y
         lb.x1, lb.y1 = x + 150, y + 70
-        lb.set_stops([
-            (0.0, 1.0, 0.0, 0.0, 1.0),
-            (0.5, 1.0, 1.0, 0.0, 1.0),
-            (1.0, 0.0, 0.0, 1.0, 1.0),
-        ])
+        lb.set_stops(
+            [
+                (0.0, 1.0, 0.0, 0.0, 1.0),
+                (0.5, 1.0, 1.0, 0.0, 1.0),
+                (1.0, 0.0, 0.0, 1.0, 1.0),
+            ]
+        )
         ctx.fill(p, lb)
 
     shapes.append(Shape(430, 10, 150, 70, draw_lin_grad))
@@ -472,10 +474,12 @@ def _make_shapes():
         rb.x0, rb.y0 = cx, cy
         rb.x1, rb.y1 = cx, cy
         rb.outer_radius = r
-        rb.set_stops([
-            (0.0, 1.0, 1.0, 1.0, 1.0),
-            (1.0, 0.2, 0.0, 0.6, 1.0),
-        ])
+        rb.set_stops(
+            [
+                (0.0, 1.0, 1.0, 1.0, 1.0),
+                (1.0, 0.2, 0.0, 0.6, 1.0),
+            ]
+        )
         ctx.fill(p, rb)
 
     shapes.append(Shape(465, 100, 80, 80, draw_rad_grad))
@@ -678,7 +682,9 @@ def build_drawing_tab():
         sp2.thickness = 2.5
         sp2.cap = libui.LineCap.ROUND
         sp2.join = libui.LineJoin.ROUND
-        all_strokes = strokes + ([current_stroke["pts"]] if current_stroke["pts"] else [])
+        all_strokes = strokes + (
+            [current_stroke["pts"]] if current_stroke["pts"] else []
+        )
         for pts in all_strokes:
             if len(pts) < 2:
                 continue
@@ -690,7 +696,13 @@ def build_drawing_tab():
             ctx.stroke(p, ink, sp2)
 
         # Hint
-        _draw_label(ctx, "Draw with mouse \u2014 click and drag to sketch lines", 20, 20, size=14.0)
+        _draw_label(
+            ctx,
+            "Draw with mouse \u2014 click and drag to sketch lines",
+            20,
+            20,
+            size=14.0,
+        )
 
     def on_scroll_mouse(event):
         nonlocal scroll_node
@@ -728,14 +740,70 @@ def build_table_tab(app: App):
 
     data = ListState(
         [
-            {"checked": 1, "name": "Alice Johnson", "role": "Engineer", "score": 85, "vip": 1, "action": "Details"},
-            {"checked": 0, "name": "Bob Smith", "role": "Designer", "score": 72, "vip": 0, "action": "Details"},
-            {"checked": 1, "name": "Carol White", "role": "Manager", "score": 90, "vip": 1, "action": "Details"},
-            {"checked": 0, "name": "Dave Brown", "role": "Intern", "score": 45, "vip": 0, "action": "Details"},
-            {"checked": 1, "name": "Eve Davis", "role": "Engineer", "score": 95, "vip": 1, "action": "Details"},
-            {"checked": 0, "name": "Frank Miller", "role": "Analyst", "score": 68, "vip": 0, "action": "Details"},
-            {"checked": 1, "name": "Grace Lee", "role": "Lead", "score": 88, "vip": 0, "action": "Details"},
-            {"checked": 0, "name": "Hank Wilson", "role": "QA", "score": 77, "vip": 0, "action": "Details"},
+            {
+                "checked": 1,
+                "name": "Alice Johnson",
+                "role": "Engineer",
+                "score": 85,
+                "vip": 1,
+                "action": "Details",
+            },
+            {
+                "checked": 0,
+                "name": "Bob Smith",
+                "role": "Designer",
+                "score": 72,
+                "vip": 0,
+                "action": "Details",
+            },
+            {
+                "checked": 1,
+                "name": "Carol White",
+                "role": "Manager",
+                "score": 90,
+                "vip": 1,
+                "action": "Details",
+            },
+            {
+                "checked": 0,
+                "name": "Dave Brown",
+                "role": "Intern",
+                "score": 45,
+                "vip": 0,
+                "action": "Details",
+            },
+            {
+                "checked": 1,
+                "name": "Eve Davis",
+                "role": "Engineer",
+                "score": 95,
+                "vip": 1,
+                "action": "Details",
+            },
+            {
+                "checked": 0,
+                "name": "Frank Miller",
+                "role": "Analyst",
+                "score": 68,
+                "vip": 0,
+                "action": "Details",
+            },
+            {
+                "checked": 1,
+                "name": "Grace Lee",
+                "role": "Lead",
+                "score": 88,
+                "vip": 0,
+                "action": "Details",
+            },
+            {
+                "checked": 0,
+                "name": "Hank Wilson",
+                "role": "QA",
+                "score": 77,
+                "vip": 0,
+                "action": "Details",
+            },
         ]
     )
 

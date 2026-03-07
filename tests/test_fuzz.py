@@ -5,7 +5,6 @@ missing required args, etc.) to the C extension and asserts that a Python
 exception is raised instead of a segfault/SIGBUS.
 """
 
-import pytest
 from libui import core
 from tests.conftest import flush_main
 
@@ -27,8 +26,16 @@ def assert_no_crash(fn, *args, **kwargs):
     """Call fn and expect a Python exception, never a crash."""
     try:
         fn(*args, **kwargs)
-    except (TypeError, ValueError, RuntimeError, OverflowError,
-            SystemError, AttributeError, OSError, Exception):
+    except (
+        TypeError,
+        ValueError,
+        RuntimeError,
+        OverflowError,
+        SystemError,
+        AttributeError,
+        OSError,
+        Exception,
+    ):
         pass  # Any Python exception is fine — no crash is the goal
 
 
@@ -60,6 +67,7 @@ class TestModuleFunctions:
     def test_queue_main_callable_that_raises(self):
         def explode():
             raise RuntimeError("boom")
+
         core.queue_main(explode)
         flush_main()  # should not crash
 
@@ -164,7 +172,7 @@ class TestAttributeFactories:
         for v in [None, "x", [], {}]:
             assert_no_crash(core.color_attribute, v, 0, 0, 0)
         # Out of range floats
-        assert_no_crash(core.color_attribute, -1.0, 2.0, 1e30, float('nan'))
+        assert_no_crash(core.color_attribute, -1.0, 2.0, 1e30, float("nan"))
 
     def test_background_attribute_bad(self):
         assert_no_crash(core.background_attribute)
@@ -1140,7 +1148,7 @@ class TestDrawPathFuzz:
         for v in [None, "x", [], {}]:
             assert_no_crash(p.line_to, v, 0)
             assert_no_crash(p.line_to, 0, v)
-        assert_no_crash(p.line_to, float('nan'), float('inf'))
+        assert_no_crash(p.line_to, float("nan"), float("inf"))
 
     def test_arc_to_bad(self):
         p = core.DrawPath()
@@ -1189,12 +1197,11 @@ class TestDrawPathFuzz:
 class TestDrawBrushFuzz:
     def test_props_bad(self):
         b = core.DrawBrush()
-        for prop in ("r", "g", "b", "a", "x0", "y0", "x1", "y1",
-                     "outer_radius"):
+        for prop in ("r", "g", "b", "a", "x0", "y0", "x1", "y1", "outer_radius"):
             for v in [None, "x", [], {}]:
                 assert_no_crash(setattr, b, prop, v)
-            assert_no_crash(setattr, b, prop, float('nan'))
-            assert_no_crash(setattr, b, prop, float('inf'))
+            assert_no_crash(setattr, b, prop, float("nan"))
+            assert_no_crash(setattr, b, prop, float("inf"))
             assert_no_crash(setattr, b, prop, -1e30)
 
     def test_type_bad(self):
@@ -1255,9 +1262,9 @@ class TestDrawMatrixFuzz:
             assert_no_crash(m.scale, v, 0, 1, 1)
             assert_no_crash(m.rotate, v, 0, 0)
             assert_no_crash(m.skew, v, 0, 0, 0)
-        assert_no_crash(m.translate, float('nan'), float('inf'))
-        assert_no_crash(m.transform_point, float('nan'), 0)
-        assert_no_crash(m.transform_size, float('nan'), 0)
+        assert_no_crash(m.translate, float("nan"), float("inf"))
+        assert_no_crash(m.transform_point, float("nan"), 0)
+        assert_no_crash(m.transform_size, float("nan"), 0)
 
     def test_multiply_bad(self):
         m = core.DrawMatrix()
@@ -1283,8 +1290,7 @@ class TestDrawMatrixFuzz:
 
 class TestTableModelFuzz:
     def _make_model(self):
-        return core.TableModel(
-            2, lambda col: 0, lambda: 0, lambda row, col: "")
+        return core.TableModel(2, lambda col: 0, lambda: 0, lambda row, col: "")
 
     def test_constructor_bad(self):
         # Missing args
@@ -1335,8 +1341,7 @@ class TestTableModelFuzz:
 
 class TestTableFuzz:
     def _make_model(self):
-        return core.TableModel(
-            2, lambda col: 0, lambda: 0, lambda row, col: "")
+        return core.TableModel(2, lambda col: 0, lambda: 0, lambda row, col: "")
 
     def test_constructor_bad(self):
         assert_no_crash(core.Table)
@@ -1398,14 +1403,14 @@ class TestAreaFuzz:
         assert_no_crash(core.ScrollingArea)
         # Bad width/height with valid on_draw
         for v in BAD_INTS:
-            assert_no_crash(core.ScrollingArea, on_draw=self._draw_cb,
-                            width=v, height=100)
-            assert_no_crash(core.ScrollingArea, on_draw=self._draw_cb,
-                            width=100, height=v)
-        assert_no_crash(core.ScrollingArea, on_draw=self._draw_cb,
-                        width=-1, height=-1)
-        assert_no_crash(core.ScrollingArea, on_draw=self._draw_cb,
-                        width=0, height=0)
+            assert_no_crash(
+                core.ScrollingArea, on_draw=self._draw_cb, width=v, height=100
+            )
+            assert_no_crash(
+                core.ScrollingArea, on_draw=self._draw_cb, width=100, height=v
+            )
+        assert_no_crash(core.ScrollingArea, on_draw=self._draw_cb, width=-1, height=-1)
+        assert_no_crash(core.ScrollingArea, on_draw=self._draw_cb, width=0, height=0)
 
     def test_area_methods_bad(self):
         a = core.Area(on_draw=self._draw_cb)
@@ -1445,15 +1450,33 @@ class TestDrawTextLayoutFuzz:
         for v in BAD_VALUES:
             assert_no_crash(core.DrawTextLayout, astr, v, 100.0, 0)
         for v in [None, "x", [], {}]:
-            assert_no_crash(core.DrawTextLayout, astr,
-                            {"family": "Arial", "size": 12,
-                             "weight": 400, "italic": 0, "stretch": 4},
-                            v, 0)
+            assert_no_crash(
+                core.DrawTextLayout,
+                astr,
+                {
+                    "family": "Arial",
+                    "size": 12,
+                    "weight": 400,
+                    "italic": 0,
+                    "stretch": 4,
+                },
+                v,
+                0,
+            )
         for v in [None, "x", [], {}]:
-            assert_no_crash(core.DrawTextLayout, astr,
-                            {"family": "Arial", "size": 12,
-                             "weight": 400, "italic": 0, "stretch": 4},
-                            100.0, v)
+            assert_no_crash(
+                core.DrawTextLayout,
+                astr,
+                {
+                    "family": "Arial",
+                    "size": 12,
+                    "weight": 400,
+                    "italic": 0,
+                    "stretch": 4,
+                },
+                100.0,
+                v,
+            )
 
 
 # ===========================================================================

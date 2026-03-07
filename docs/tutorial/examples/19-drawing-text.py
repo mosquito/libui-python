@@ -1,4 +1,5 @@
 """Drawing styled text — attributed strings with formatting."""
+
 import libui
 from libui.declarative import App, Window, VBox, DrawArea, stretchy
 
@@ -39,10 +40,14 @@ def on_draw(ctx, area_w, area_h, clip_x, clip_y, clip_w, clip_h):
 async def main():
     app = App()
 
-    app.build(window=Window(
-        "Styled Text", 500, 150,
-        child=VBox(stretchy(DrawArea(on_draw=on_draw))),
-    ))
+    app.build(
+        window=Window(
+            "Styled Text",
+            500,
+            150,
+            child=VBox(stretchy(DrawArea(on_draw=on_draw))),
+        )
+    )
 
     app.show()
     await app.wait()

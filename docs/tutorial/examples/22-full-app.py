@@ -1,12 +1,30 @@
 """Full application — contact manager with table, editor, menus, and async I/O."""
+
 import asyncio
 import libui
 from libui.declarative import (
-    App, Window, Tab, VBox, HBox, Form, Separator,
-    Label, Button, Entry, MultilineEntry, Combobox,
-    State, ListState, stretchy,
-    DataTable, TextColumn, CheckboxTextColumn,
-    MenuDef, MenuItem, MenuSeparator, QuitItem, AboutItem,
+    App,
+    Window,
+    VBox,
+    HBox,
+    Form,
+    Separator,
+    Label,
+    Button,
+    Entry,
+    MultilineEntry,
+    Combobox,
+    State,
+    ListState,
+    stretchy,
+    DataTable,
+    TextColumn,
+    CheckboxTextColumn,
+    MenuDef,
+    MenuItem,
+    MenuSeparator,
+    QuitItem,
+    AboutItem,
     ProgressBar,
 )
 
@@ -50,7 +68,9 @@ def build_editor(contacts, status, editing_index):
             status.set("Error: name required.")
             return
         row = {
-            "selected": 0, "first": f, "last": l,
+            "selected": 0,
+            "first": f,
+            "last": l,
             "email": email.value.strip(),
             "category": CATEGORIES[category.value],
             "notes": notes.value.strip(),
@@ -94,32 +114,58 @@ def build_editor(contacts, status, editing_index):
 def build_list(contacts, status, editing_index):
     """Left-side contact list with table."""
     return VBox(
-        stretchy(DataTable(
-            contacts,
-            CheckboxTextColumn("Name", checkbox_key="selected",
-                               text_key="first", checkbox_editable=True),
-            TextColumn("Last", key="last"),
-            TextColumn("Email", key="email"),
-            TextColumn("Category", key="category"),
-            on_row_clicked=lambda row: status.set(
-                f"Selected: {contacts[row]['first']} {contacts[row]['last']}"
-            ),
-            on_row_double_clicked=lambda row: editing_index.set(row),
-        )),
+        stretchy(
+            DataTable(
+                contacts,
+                CheckboxTextColumn(
+                    "Name",
+                    checkbox_key="selected",
+                    text_key="first",
+                    checkbox_editable=True,
+                ),
+                TextColumn("Last", key="last"),
+                TextColumn("Email", key="email"),
+                TextColumn("Category", key="category"),
+                on_row_clicked=lambda row: status.set(
+                    f"Selected: {contacts[row]['first']} {contacts[row]['last']}"
+                ),
+                on_row_double_clicked=lambda row: editing_index.set(row),
+            )
+        ),
     )
 
 
 async def main():
     app = App()
 
-    contacts = ListState([
-        {"selected": 0, "first": "Alice", "last": "Johnson",
-         "email": "alice@example.com", "category": "Work", "notes": "Met at PyCon."},
-        {"selected": 0, "first": "Bob", "last": "Smith",
-         "email": "bob@email.org", "category": "Personal", "notes": ""},
-        {"selected": 0, "first": "Carol", "last": "Williams",
-         "email": "carol@bigco.io", "category": "Work", "notes": "London office."},
-    ])
+    contacts = ListState(
+        [
+            {
+                "selected": 0,
+                "first": "Alice",
+                "last": "Johnson",
+                "email": "alice@example.com",
+                "category": "Work",
+                "notes": "Met at PyCon.",
+            },
+            {
+                "selected": 0,
+                "first": "Bob",
+                "last": "Smith",
+                "email": "bob@email.org",
+                "category": "Personal",
+                "notes": "",
+            },
+            {
+                "selected": 0,
+                "first": "Carol",
+                "last": "Williams",
+                "email": "carol@bigco.io",
+                "category": "Work",
+                "notes": "London office.",
+            },
+        ]
+    )
     status = State("Ready. Double-click a row to edit.")
     editing_index = State(-1)
     progress = State(0)
@@ -135,12 +181,14 @@ async def main():
         progress.set(0)
 
     menus = [
-        MenuDef("File",
+        MenuDef(
+            "File",
             MenuItem("Export...", on_click=do_export),
             MenuSeparator(),
             QuitItem(),
         ),
-        MenuDef("Help",
+        MenuDef(
+            "Help",
             AboutItem(),
         ),
     ]
@@ -150,17 +198,25 @@ async def main():
 
     app.build(
         menus=menus,
-        window=Window("Contact Manager", 800, 500, has_menubar=True, child=VBox(
-            stretchy(HBox(
-                stretchy(contact_list),
-                stretchy(editor),
-            )),
-            Separator(),
-            HBox(
-                stretchy(Label(text=status)),
-                ProgressBar(value=progress),
+        window=Window(
+            "Contact Manager",
+            800,
+            500,
+            has_menubar=True,
+            child=VBox(
+                stretchy(
+                    HBox(
+                        stretchy(contact_list),
+                        stretchy(editor),
+                    )
+                ),
+                Separator(),
+                HBox(
+                    stretchy(Label(text=status)),
+                    ProgressBar(value=progress),
+                ),
             ),
-        )),
+        ),
     )
 
     app.show()

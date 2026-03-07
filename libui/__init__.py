@@ -112,12 +112,14 @@ class _Proxy:
 
     def _sync_cache(self):
         """Populate cache from the core widget. Must run on main thread."""
+
         def _read():
             for p in self._cached_props:
                 try:
                     self._cache[p] = getattr(self._core, p)
                 except Exception:
                     pass
+
         # _sync_cache is called right after invoke_on_main(_create_core),
         # so we're on the asyncio thread — dispatch to main.
         invoke_on_main(_read)

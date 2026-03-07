@@ -104,6 +104,7 @@ class Computed(Generic[T]):
 
 class ListState(Generic[T]):
     """Observable list for tables. Notifies on insert/delete/change."""
+
     __slots__ = ("data", "subscribers")
 
     def __init__(self, initial: list[T] | None = None) -> None:

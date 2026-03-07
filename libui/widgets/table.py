@@ -17,7 +17,11 @@ class _ColumnDescriptor:
 
 class TextColumn(_ColumnDescriptor):
     def __init__(
-        self, name: str, key: str, editable: bool = False, color_col: int = -1,
+        self,
+        name: str,
+        key: str,
+        editable: bool = False,
+        color_col: int = -1,
         width: int = -1,
     ):
         self.name = name
@@ -282,6 +286,7 @@ class DataTable(Node):
                     model.row_deleted(index)
                 elif event == "changed":
                     model.row_changed(index)
+
             core.queue_main(_notify)
 
         unsub = data.subscribe(on_data_event)
