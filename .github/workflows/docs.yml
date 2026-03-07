@@ -18,13 +18,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
 
-      - name: Install dependencies
-        run: pip install uv && uv sync --group docs --no-install-project
+      - name: Install Linux dependencies
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev pkg-config
+
+      - name: Apply patches to libui-ng
+        run: python scripts/apply_patches.py
+
+      - name: Install package
+        run: pip install uv && uv sync --extra dev --extra docs
 
       - name: Build docs
         run: uv run sphinx-build -b html docs docs/_build/html
