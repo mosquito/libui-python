@@ -54,7 +54,7 @@ jobs:
         run: python scripts/apply_patches.py
 
       - name: Install package
-        run: pip install uv && uv sync --extra dev
+        run: pip install uv && uv sync --group dev
 
       - name: Run tests (Linux)
         if: runner.os == 'Linux'
