@@ -1,4 +1,4 @@
-![libui-python](https://raw.githubusercontent.com/mosquito/libui-python/master/docs/_static/logo.svg)
+<img src="https://raw.githubusercontent.com/mosquito/libui-python/master/docs/_static/logo.svg" alt="libui-python" width="96">
 
 # libui-python
 
