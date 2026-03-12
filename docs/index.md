@@ -1,5 +1,13 @@
 # libui-python
 
+[![GitHub](https://img.shields.io/badge/GitHub-mosquito%2Flibui--python-blue?logo=github)](https://github.com/mosquito/libui-python)
+[![CI](https://img.shields.io/github/actions/workflow/status/mosquito/libui-python/ci.yml?branch=master&logo=github-actions&logoColor=white&label=CI)](https://github.com/mosquito/libui-python/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](https://github.com/mosquito/libui-python/blob/master/LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%E2%80%933.14-blue?logo=python&logoColor=white)](https://pypi.org/project/libui/)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/mosquito/libui-python)
+[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macOS%20%7C%20windows-lightgrey)](https://github.com/mosquito/libui-python)
+[![Native UI](https://img.shields.io/badge/UI-100%25%20native-ff69b4)](https://github.com/libui-ng/libui-ng)
+
 Native GUI toolkit for Python. Lightweight bindings for [libui-ng](https://github.com/libui-ng/libui-ng) — real native widgets on Linux (GTK+3), macOS (Cocoa), and Windows (Win32).
 
 No Electron. No web views. Just native controls.

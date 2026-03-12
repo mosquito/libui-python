@@ -1,0 +1,54 @@
+.github-fork-ribbon {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 9999;
+    overflow: hidden;
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+}
+
+.github-fork-ribbon a {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 225px;
+    padding: 5px 0;
+    background-color: #24292e;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    text-align: center;
+    text-decoration: none;
+    line-height: 18px;
+    letter-spacing: 0.3px;
+    transform: rotate(45deg);
+    top: 40px;
+    right: -52px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+    transition: background-color 0.15s ease;
+}
+
+.github-fork-ribbon a:hover {
+    background-color: #444d56;
+    color: #fff;
+    text-decoration: none;
+}
+
+.github-fork-ribbon svg {
+    width: 14px;
+    height: 14px;
+    fill: #fff;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .github-fork-ribbon {
+        display: none;
+    }
+}

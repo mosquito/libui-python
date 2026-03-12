@@ -1,9 +1,14 @@
-# python-libui-ng
+![libui-python](https://raw.githubusercontent.com/mosquito/libui-python/master/docs/_static/logo.svg)
 
-[![PyPI Version](https://img.shields.io/pypi/v/libui.svg)](https://pypi.org/project/libui/)
+# libui-python
+
+[![CI](https://img.shields.io/github/actions/workflow/status/mosquito/libui-python/ci.yml?branch=master&logo=github-actions&logoColor=white&label=CI)](https://github.com/mosquito/libui-python/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/libui.svg)](https://pypi.org/project/libui/)
 [![Python](https://img.shields.io/pypi/pyversions/libui.svg)](https://pypi.org/project/libui/)
-[![License: MIT](https://img.shields.io/github/license/mosquito/libui-python.svg)](https://github.com/mosquito/libui-python/blob/main/LICENSE)
-[![GitHub Issues](https://img.shields.io/github/issues/mosquito/libui-python.svg)](https://github.com/mosquito/libui-python/issues)
+[![License](https://img.shields.io/github/license/mosquito/libui-python.svg)](https://github.com/mosquito/libui-python/blob/master/LICENSE)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](https://github.com/mosquito/libui-python)
+[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macOS%20%7C%20windows-lightgrey)](https://github.com/mosquito/libui-python)
+[![Native UI](https://img.shields.io/badge/UI-100%25%20native-ff69b4)](https://github.com/libui-ng/libui-ng)
 
 Native GUI toolkit for Python. Lightweight bindings for [libui-ng](https://github.com/libui-ng/libui-ng) — real native widgets on Linux (GTK+3), macOS (Cocoa), and Windows (Win32).
 
