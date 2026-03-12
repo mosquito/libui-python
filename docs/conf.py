@@ -10,7 +10,18 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
 ]
+
+autodoc_member_order = "bysource"
+autodoc_default_options = {
+    "show-inheritance": True,
+}
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+}
 
 templates_path = ["_templates"]
 html_static_path = ["_static"]

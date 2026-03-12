@@ -4,15 +4,14 @@
 
 ```
 libui
-├── core          # C extension — low-level bindings to libui-ng
-├── loop          # Threading model — run(), invoke_on_main(), etc.
-├── state         # Reactive state — State, Computed, ListState
-├── node          # Node base class, BuildContext, stretchy, make_two_way
-├── declarative   # High-level API — App, Window, MenuDef, all widget nodes
-│   ├── app       # App, Window, MenuDef, MenuItem, etc.
-│   └── ...
-└── widgets       # Individual widget node implementations
-    ├── containers  # VBox, HBox, Group, Form, Tab, Grid
+├── core            # C extension — low-level bindings to libui-ng
+├── loop            # Threading model — run(), invoke_on_main(), etc.
+├── state           # Reactive state — State, Computed, ListState
+├── node            # Node base class, BuildContext, stretchy
+├── declarative     # High-level API — re-exports everything below
+│   └── app         # App, Window, MenuDef, MenuItem, etc.
+└── widgets         # Individual widget node implementations
+    ├── containers  # VBox, HBox, Group, Form, Tab, Grid, GridCell
     ├── button      # Button
     ├── label       # Label
     ├── entry       # Entry, MultilineEntry
@@ -45,8 +44,8 @@ These are proxy wrappers around `libui.core` objects that automatically dispatch
 
 ### Functions
 
-- `libui.run(coro)` — Start the two-thread architecture and run your async function
-- `libui.quit()` — Stop the UI event loop (thread-safe)
+- {func}`libui.loop.run` — Start the two-thread architecture and run your async function
+- {func}`libui.loop.quit` — Stop the UI event loop (thread-safe)
 
 ## `libui.declarative`
 
@@ -60,79 +59,153 @@ See the {doc}`../widgets/index` for complete widget documentation.
 
 ### Exports
 
-**App & Window:** `App`, `Window`
+**App & Window:** {class}`~libui.declarative.app.App`, {class}`~libui.declarative.app.Window`
 
-**Containers:** `VBox`, `HBox`, `Group`, `Form`, `Tab`, `Grid`, `GridCell`
+**Containers:** {class}`~libui.widgets.containers.VBox`, {class}`~libui.widgets.containers.HBox`, {class}`~libui.widgets.containers.Group`, {class}`~libui.widgets.containers.Form`, {class}`~libui.widgets.containers.Tab`, {class}`~libui.widgets.containers.Grid`, {class}`~libui.widgets.containers.GridCell`
 
-**Controls:** `Label`, `Button`, `Entry`, `MultilineEntry`, `Checkbox`, `Slider`, `Spinbox`, `ProgressBar`, `Combobox`, `EditableCombobox`, `RadioButtons`, `ColorButton`, `FontButton`, `DateTimePicker`, `Separator`
+**Controls:** {class}`~libui.widgets.label.Label`, {class}`~libui.widgets.button.Button`, {class}`~libui.widgets.entry.Entry`, {class}`~libui.widgets.entry.MultilineEntry`, {class}`~libui.widgets.checkbox.Checkbox`, {class}`~libui.widgets.slider.Slider`, {class}`~libui.widgets.spinbox.Spinbox`, {class}`~libui.widgets.progressbar.ProgressBar`, {class}`~libui.widgets.combobox.Combobox`, {class}`~libui.widgets.combobox.EditableCombobox`, {class}`~libui.widgets.radiobuttons.RadioButtons`, {class}`~libui.widgets.pickers.ColorButton`, {class}`~libui.widgets.pickers.FontButton`, {class}`~libui.widgets.pickers.DateTimePicker`, {class}`~libui.widgets.separator.Separator`
 
-**Drawing:** `DrawArea`, `ScrollingDrawArea`
+**Drawing:** {class}`~libui.widgets.draw.DrawArea`, {class}`~libui.widgets.draw.ScrollingDrawArea`
 
-**Tables:** `DataTable`, `ListState`, `TextColumn`, `CheckboxColumn`, `CheckboxTextColumn`, `ProgressColumn`, `ButtonColumn`, `ImageColumn`, `ImageTextColumn`
+**Tables:** {class}`~libui.widgets.table.DataTable`, {class}`~libui.state.ListState`, {class}`~libui.widgets.table.TextColumn`, {class}`~libui.widgets.table.CheckboxColumn`, {class}`~libui.widgets.table.CheckboxTextColumn`, {class}`~libui.widgets.table.ProgressColumn`, {class}`~libui.widgets.table.ButtonColumn`, {class}`~libui.widgets.table.ImageColumn`, {class}`~libui.widgets.table.ImageTextColumn`
 
-**Menus:** `MenuDef`, `MenuItem`, `CheckMenuItem`, `MenuSeparator`, `QuitItem`, `PreferencesItem`, `AboutItem`
+**Menus:** {class}`~libui.declarative.app.MenuDef`, {class}`~libui.declarative.app.MenuItem`, {class}`~libui.declarative.app.CheckMenuItem`, {class}`~libui.declarative.app.MenuSeparator`, {class}`~libui.declarative.app.QuitItem`, {class}`~libui.declarative.app.PreferencesItem`, {class}`~libui.declarative.app.AboutItem`
 
-**State:** `State`, `Computed`, `ListState`
+**State:** {class}`~libui.state.State`, {class}`~libui.state.Computed`, {class}`~libui.state.ListState`
 
-**Helpers:** `stretchy`
+**Helpers:** {func}`~libui.node.stretchy`
 
 ## `libui.state`
 
-### `State[T]`
+### {class}`~libui.state.State`
 
 | Method | Description |
 |---|---|
-| `State(initial)` | Create with initial value |
-| `.value` | Get/set current value |
-| `.get()` | Get current value |
-| `.set(new)` | Set value and notify |
-| `.update(fn)` | Apply `fn(current) -> new` and notify |
-| `.subscribe(cb)` | Add subscriber, returns unsubscribe function |
-| `.unsubscribe(cb)` | Remove subscriber |
-| `.map(fn)` | Create `Computed` derived value |
+| {meth}`~libui.state.State.get` | Get current value |
+| {meth}`~libui.state.State.set` | Set value and notify |
+| {meth}`~libui.state.State.update` | Apply `fn(current) -> new` and notify |
+| {meth}`~libui.state.State.subscribe` | Add subscriber, returns unsubscribe function |
+| {meth}`~libui.state.State.unsubscribe` | Remove subscriber |
+| {meth}`~libui.state.State.map` | Create {class}`~libui.state.Computed` derived value |
 
-### `Computed[T]`
+### {class}`~libui.state.Computed`
 
 | Method | Description |
 |---|---|
-| `.value` | Get current computed value (read-only) |
-| `.get()` | Get current computed value |
-| `.subscribe(cb)` | Add subscriber |
-| `.unsubscribe(cb)` | Remove subscriber |
-| `.map(fn)` | Chain another derived value |
+| {meth}`~libui.state.Computed.get` | Get current computed value |
+| {meth}`~libui.state.Computed.subscribe` | Add subscriber |
+| {meth}`~libui.state.Computed.unsubscribe` | Remove subscriber |
+| {meth}`~libui.state.Computed.map` | Chain another derived value |
 
-### `ListState[T]`
+### {class}`~libui.state.ListState`
 
 | Method | Description |
 |---|---|
-| `ListState(initial)` | Create with initial list |
-| `.append(item)` | Add item, notify with `event="inserted"` |
-| `.pop(index=-1)` | Remove item, notify with `event="deleted"` |
-| `[index]` | Get item |
-| `[index] = value` | Set item, notify with `event="changed"` |
-| `len()` | Get length |
-| `.subscribe(cb)` | Add subscriber for change events |
+| {meth}`~libui.state.ListState.append` | Add item, notify with `event="inserted"` |
+| {meth}`~libui.state.ListState.pop` | Remove item, notify with `event="deleted"` |
+| {meth}`~libui.state.ListState.subscribe` | Add subscriber for change events |
 
 ## `libui.loop`
 
 | Function | Description |
 |---|---|
-| `run(coro)` | Start UI + asyncio event loops |
-| `quit()` | Stop the event loop |
-| `invoke_on_main(fn, *args, **kwargs)` | Run `fn` on main thread, block for result |
-| `invoke_on_main_async(fn, *args, **kwargs)` | Run `fn` on main thread, return awaitable |
+| {func}`~libui.loop.run` | Start UI + asyncio event loops |
+| {func}`~libui.loop.quit` | Stop the event loop |
+| {func}`~libui.loop.invoke_on_main` | Run `fn` on main thread, block for result |
+| {func}`~libui.loop.invoke_on_main_async` | Run `fn` on main thread, return awaitable |
 
 ## `libui.core`
 
 The C extension module. Provides direct access to libui-ng widgets without thread-safety wrappers. All functions (except `queue_main` and `quit`) must be called from the main thread.
 
+### Functions
+
 | Function | Thread-safe | Description |
 |---|---|---|
-| `core.init()` | No | Initialize libui |
-| `core.uninit()` | No | Clean up libui |
-| `core.main()` | No | Run the main event loop |
-| `core.main_step(wait)` | No | Process one event |
-| `core.main_steps()` | No | Process pending events |
-| `core.quit()` | Yes | Stop the event loop |
-| `core.queue_main(fn)` | Yes | Enqueue function for main thread |
-| `core.is_main_thread()` | Yes | Check if on main thread |
+| {func}`~libui.core.init` | No | Initialize libui |
+| {func}`~libui.core.uninit` | No | Clean up libui |
+| {func}`~libui.core.main` | No | Run the main event loop (blocking) |
+| {func}`~libui.core.main_steps` | No | Enable stepping mode |
+| {func}`~libui.core.main_step` | No | Process one event (requires `main_steps()` first) |
+| {func}`~libui.core.quit` | Yes | Stop the event loop |
+| {func}`~libui.core.queue_main` | Yes | Enqueue function for main thread |
+| {func}`~libui.core.is_main_thread` | Yes | Check if on main thread |
+| {func}`~libui.core.on_should_quit` | No | Register quit handler |
+
+### Dialogs
+
+| Function | Description |
+|---|---|
+| {func}`~libui.core.open_file` | Show file open dialog, returns path or `None` |
+| {func}`~libui.core.open_folder` | Show folder open dialog, returns path or `None` |
+| {func}`~libui.core.save_file` | Show file save dialog, returns path or `None` |
+| {func}`~libui.core.msg_box` | Show info message box |
+| {func}`~libui.core.msg_box_error` | Show error message box |
+
+### Text attributes
+
+| Function | Description |
+|---|---|
+| {func}`~libui.core.family_attribute` | Font family attribute |
+| {func}`~libui.core.size_attribute` | Font size attribute |
+| {func}`~libui.core.weight_attribute` | Font weight attribute |
+| {func}`~libui.core.italic_attribute` | Italic style attribute |
+| {func}`~libui.core.stretch_attribute` | Font stretch attribute |
+| {func}`~libui.core.color_attribute` | Text color attribute |
+| {func}`~libui.core.background_attribute` | Background color attribute |
+| {func}`~libui.core.underline_attribute` | Underline style attribute |
+| {func}`~libui.core.underline_color_attribute` | Underline color attribute |
+| {func}`~libui.core.features_attribute` | OpenType features attribute |
+
+### Types
+
+| Type | Description |
+|---|---|
+| {class}`~libui.core.Window` | Top-level window |
+| {class}`~libui.core.Button` | Clickable button |
+| {class}`~libui.core.Label` | Text label |
+| {class}`~libui.core.Box` | Vertical/horizontal container |
+| {class}`~libui.core.Entry` | Text input |
+| {class}`~libui.core.Checkbox` | Toggle checkbox |
+| {class}`~libui.core.Combobox` | Dropdown selector |
+| {class}`~libui.core.EditableCombobox` | Editable dropdown |
+| {class}`~libui.core.RadioButtons` | Radio button group |
+| {class}`~libui.core.Tab` | Tabbed container |
+| {class}`~libui.core.Group` | Titled container |
+| {class}`~libui.core.Form` | Label + control pairs |
+| {class}`~libui.core.Grid` | Grid layout |
+| {class}`~libui.core.Spinbox` | Numeric spinner |
+| {class}`~libui.core.Slider` | Range slider |
+| {class}`~libui.core.ProgressBar` | Progress indicator |
+| {class}`~libui.core.Separator` | Visual divider |
+| {class}`~libui.core.MultilineEntry` | Multi-line text editor |
+| {class}`~libui.core.DateTimePicker` | Date/time picker |
+| {class}`~libui.core.ColorButton` | Color picker |
+| {class}`~libui.core.FontButton` | Font picker |
+| {class}`~libui.core.Menu` | Menu bar entry |
+| {class}`~libui.core.MenuItem` | Menu item |
+| {class}`~libui.core.DrawPath` | Geometry path |
+| {class}`~libui.core.DrawBrush` | Fill/stroke brush |
+| {class}`~libui.core.DrawStrokeParams` | Stroke parameters |
+| {class}`~libui.core.DrawMatrix` | Affine transform |
+| {class}`~libui.core.DrawTextLayout` | Formatted text layout |
+| {class}`~libui.core.AttributedString` | Rich text with attributes |
+| {class}`~libui.core.OpenTypeFeatures` | OpenType feature set |
+| {class}`~libui.core.Image` | Image for tables |
+| {class}`~libui.core.TableModel` | Table data model |
+| {class}`~libui.core.Table` | Data table widget |
+| {class}`~libui.core.Area` | Custom drawing surface |
+| {class}`~libui.core.ScrollingArea` | Scrollable drawing surface |
+
+## Full API docs
+
+```{toctree}
+:maxdepth: 2
+
+core
+state
+loop
+node
+declarative
+widgets
+```
